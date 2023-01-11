@@ -46,8 +46,7 @@ async function getHtml({ panel, document, diffTarget, context }: GetHtmlArgs) {
   const scriptUri = webview.asWebviewUri(
     vscode.Uri.joinPath(context.extensionUri, "out", "webview", "viewer.js")
   );
-  // console.log(">>", scriptUri.toString());
-  // console.log(">>", webview.cspSource);
+  panel.webview.postMessage({ uri: dataUri });
   return `
     <!DOCTYPE html>
     <html lang="en">
@@ -191,7 +190,6 @@ export class ImageDiffViewer implements vscode.CustomReadonlyEditorProvider {
     webviewPanel.webview.onDidReceiveMessage((message) => {
       console.log("message", { message });
     });
-    webviewPanel.webview.postMessage("ech");
   }
 }
 
