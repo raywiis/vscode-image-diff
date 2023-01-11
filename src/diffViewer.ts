@@ -8,7 +8,11 @@ function uint8ToDataUri(data: Uint8Array) {
   return `data:image/png;base64, ${b64}`;
 }
 
-async function getHtml(panel: vscode.WebviewPanel, document?: vscode.CustomDocument, diffTarget?: vscode.CustomDocument) {
+type GetHtmlArgs = {
+ panel: vscode.WebviewPanel, document?: vscode.CustomDocument, diffTarget?: vscode.CustomDocument, context: vscode.ExtensionContext
+};
+
+async function getHtml({ panel, document, diffTarget, context }: GetHtmlArgs) {
   const webview = panel.webview;
   let dataUri = null;
   let diffUri = null;
@@ -34,13 +38,19 @@ async function getHtml(panel: vscode.WebviewPanel, document?: vscode.CustomDocum
       }
     }
   }
+  const scriptUri = webview.asWebviewUri(vscode.Uri.joinPath(context.extensionUri, 'out', 'webview', 'viewer.js'))
+  // console.log(">>", scriptUri.toString());
+  // console.log(">>", webview.cspSource);
   return `
     <!DOCTYPE html>
     <html lang="en">
       <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src ${webview.cspSource} blob: data:; style-src ${webview.cspSource};">
+        <meta
+          http-equiv="Content-Security-Policy"
+          content="default-src 'none'; img-src ${webview.cspSource} blob: data:; style-src ${webview.cspSource}; script-src ${webview.cspSource}"
+        >
         <title>Image diff</title>
       </head>
       <body>
@@ -59,26 +69,33 @@ async function getHtml(panel: vscode.WebviewPanel, document?: vscode.CustomDocum
         <p>${diffUri}</p>
           <img src="${diffUri}"/>
         `) : ''}
+        <script src="${scriptUri}"></script>
       </body>
     </html>
   `;
 }
 
-export async function initWebview(panel: vscode.WebviewPanel) {
+export async function initWebview(panel: vscode.WebviewPanel, context: vscode.ExtensionContext) {
   panel.title = 'This is shown to user?';
-  panel.webview.html = await getHtml(panel);
+  panel.webview.html = await getHtml({ panel,context });
 }
 
 export class ImageDiffViewer implements vscode.CustomReadonlyEditorProvider {
-  openFileDocMap = new Map<string, vscode.CustomDocument>();
 
   public static viewType = 'image-diff.image-with-diff';
-  public static register() {
-    const provider = new ImageDiffViewer();
+  public static register(context: vscode.ExtensionContext) {
+    const provider = new ImageDiffViewer(context);
     const registration = vscode.window.registerCustomEditorProvider(this.viewType, provider, {
-      supportsMultipleEditorsPerDocument: true,
+      supportsMultipleEditorsPerDocument: false,
     });
     return registration;
+  }
+
+  openFileDocMap = new Map<string, vscode.CustomDocument>();
+  constructor(
+    private context: vscode.ExtensionContext,
+  ) {
+    context.extensionUri
   }
 
   openCustomDocument(uri: vscode.Uri, openContext: vscode.CustomDocumentOpenContext, token: vscode.CancellationToken): vscode.CustomDocument | Thenable<vscode.CustomDocument> {
@@ -114,11 +131,14 @@ export class ImageDiffViewer implements vscode.CustomReadonlyEditorProvider {
     this.registerOpenDocument(document);
     const diffTarget = await this.getDiffTarget(document);
     webviewPanel.title = 'This is shown to user?';
-    webviewPanel.webview.html = await getHtml(webviewPanel, document, diffTarget);
+    webviewPanel.webview.options = {
+      enableScripts: true,
+    };
+    webviewPanel.webview.html = await getHtml({ panel: webviewPanel, document, diffTarget, context: this.context });
 
     webviewPanel.onDidChangeViewState(async () => {
       webviewPanel.title = 'This is shown to user?';
-      webviewPanel.webview.html = await getHtml(webviewPanel, document, diffTarget);
+      webviewPanel.webview.html = await getHtml({ panel: webviewPanel, document, diffTarget, context: this.context });
     });
 
     webviewPanel.webview.onDidReceiveMessage((message) => {
