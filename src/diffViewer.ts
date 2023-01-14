@@ -1,6 +1,7 @@
 import * as vscode from "vscode";
 import * as pixelMatch from "pixelmatch";
 import { PNG } from "pngjs";
+import { WebviewToHostMessages } from "./webview/shared";
 
 function uint8ToDataUri(data: Uint8Array) {
   const buffer = Buffer.from(data);
@@ -17,12 +18,8 @@ type GetHtmlArgs = {
 
 async function getHtml({ panel, document, diffTarget, context }: GetHtmlArgs) {
   const webview = panel.webview;
-  let dataUri = null;
   let diffUri = null;
   if (document) {
-    const data = await vscode.workspace.fs.readFile(document.uri);
-    dataUri = uint8ToDataUri(data);
-
     if (diffTarget) {
       try {
         const a = await vscode.workspace.fs.readFile(diffTarget.uri);
@@ -71,13 +68,6 @@ async function getHtml({ panel, document, diffTarget, context }: GetHtmlArgs) {
           ${document.uri.path}
           </p>
         `
-            : ""
-        }
-        ${
-          dataUri
-            ? `
-          <img src="${dataUri}"/>
-          `
             : ""
         }
         ${
@@ -186,10 +176,12 @@ export class ImageDiffViewer implements vscode.CustomReadonlyEditorProvider {
       });
     });
 
-    webviewPanel.webview.onDidReceiveMessage(async (message) => {
+    webviewPanel.webview.onDidReceiveMessage(async (message: WebviewToHostMessages) => {
+      if (message.type !== 'ready') {
+        throw new Error('Unsupported message');
+      }
       const image = await vscode.workspace.fs.readFile(document.uri);
-      webviewPanel.webview.postMessage({ image });
-      console.log("message", { message });
+      webviewPanel.webview.postMessage({ type: 'show_image', image });
     });
   }
 }

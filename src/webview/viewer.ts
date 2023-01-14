@@ -1,38 +1,87 @@
-const d = document.createElement("div");
-d.style.color = "white";
-document.getElementsByTagName("body").item(0)?.appendChild(d);
 // @ts-expect-error
 const vscode = acquireVsCodeApi();
-
-type ShowImageMessage = {
-  image: Uint8Array;
-};
 
 const canvas = document.createElement('canvas');
 const ctx = canvas.getContext('2d');
 
 if  (!ctx) {
-  console.error('Wow');
   throw new Error('No context');
 }
 
+document.body.style.overflow = 'hidden';
 
 window.addEventListener("message", (message) => {
-  // d.innerText = "message gotted: " + JSON.stringify(message.data);
-  const d = message.data.image.data as number[];
+  console.log('got', {message});
+  if (message.data.type !== 'show_image') {
+    throw new Error('Unsupported message');
+  }
+  const d = message.data.image.data;
   const content = new Uint8Array(d);
-  console.log(message.data.image.data);
-
-  console.log({content});
-
-
   const blob = new Blob([content]);
   const objectUrl = URL.createObjectURL(blob);
-
   const image = document.createElement('img');
   document.body.appendChild(image);
   image.src = objectUrl;
+  image.style.cursor = 'grab';
 
-  console.log({ message });
+  let drag = false;
+  let initialX = 0;
+  let initialY = 0;
+
+  let dragStartX = 0;
+  let dragStartY = 0;
+
+  const setTransform = (x: number, y: number) => {
+    image.style.transform = `translate(${x}px, ${y}px)`;
+  };
+
+  const updateDrag = (dragX: number, dragY: number) => {
+    const translateX = (initialX + dragX - dragStartX);
+    const translateY = (initialY + dragY - dragStartY);
+    setTransform(translateX, translateY);
+  };
+
+  const startDrag = (x: number, y: number) => {
+    drag = true;
+    image.style.cursor = 'grabbing';
+    dragStartX = x;
+    dragStartY = y;
+  };
+
+  const stopDrag = (x: number, y: number) => {
+    drag = false;
+    image.style.cursor = 'grab';
+    updateDrag(x, y);
+    initialX += x - dragStartX;
+    initialY += y - dragStartY;
+  };
+
+  document.body.addEventListener('mousedown', (event) => {
+    startDrag(event.clientX, event.clientY);
+  });
+
+  document.body.addEventListener('mousemove', (event) => {
+    if (!drag) {
+      return;
+    }
+    event.preventDefault();
+    updateDrag(event.clientX, event.clientY);
+  });
+
+  document.body.addEventListener('mouseup', (event) => {
+    if (!drag) {
+      return;
+    }
+    stopDrag(event.clientX, event.clientY);
+  });
+
+  document.body.addEventListener('mouseleave', (event) => {
+    if (!drag) {
+      return;
+    }
+    stopDrag(event.clientX, event.clientY);
+  });
+
 });
+
 vscode.postMessage({ type: "ready" });
