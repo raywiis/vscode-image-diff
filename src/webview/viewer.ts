@@ -31,8 +31,11 @@ window.addEventListener("message", (message) => {
   let dragStartX = 0;
   let dragStartY = 0;
 
+  let scale = 1;
+
+  image.style.transformOrigin = 'top left';
   const setTransform = (x: number, y: number) => {
-    image.style.transform = `translate(${x}px, ${y}px)`;
+    image.style.transform = `matrix(${scale}, 0, 0, ${scale}, ${x}, ${y})`;
   };
 
   const updateDrag = (dragX: number, dragY: number) => {
@@ -81,6 +84,25 @@ window.addEventListener("message", (message) => {
     }
     stopDrag(event.clientX, event.clientY);
   });
+
+  document.body.addEventListener('wheel', (event) => {
+    const delta = event.deltaY * 0.01;
+
+    const s = (scale - delta) / scale;
+    const cx = event.clientX;
+    const cy = event.clientY;
+    const lx = -initialX;
+    const ly = -initialY;
+    initialX = -((cx + lx) * s - cx);
+    initialY = -((cy + ly) * s - cy);
+
+    scale -= delta;
+
+    console.log({ scale, cx, cy, initialX, initialY });
+
+    setTransform(initialX, initialY);
+  });
+
 
 });
 
