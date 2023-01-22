@@ -23,6 +23,9 @@ window.addEventListener("message", (message) => {
   document.body.appendChild(image);
   image.src = objectUrl;
   image.style.cursor = 'grab';
+  image.style.position='absolute';
+  image.style.top = '0';
+  image.style.left = '0';
 
   let drag = false;
   let initialX = 0;
@@ -87,7 +90,7 @@ window.addEventListener("message", (message) => {
 
   const MIN_SCALE = 0.4;
 
-  document.body.addEventListener('wheel', (event) => {
+  image.addEventListener('wheel', (event) => {
     const delta = event.deltaY * 0.01;
     const nextScale = scale - delta;
 
