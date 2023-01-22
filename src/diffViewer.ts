@@ -3,12 +3,6 @@ import * as pixelMatch from "pixelmatch";
 import { PNG } from "pngjs";
 import { WebviewToHostMessages } from "./webview/shared";
 
-function uint8ToDataUri(data: Uint8Array) {
-  const buffer = Buffer.from(data);
-  const b64 = buffer.toString("base64");
-  return `data:image/png;base64, ${b64}`;
-}
-
 type GetHtmlArgs = {
   panel: vscode.WebviewPanel;
   document?: vscode.CustomDocument;
@@ -115,22 +109,24 @@ export class ImageDiffViewer implements vscode.CustomReadonlyEditorProvider {
     uri: vscode.Uri,
     openContext: vscode.CustomDocumentOpenContext,
     token: vscode.CancellationToken
-  ): vscode.CustomDocument | Thenable<vscode.CustomDocument> {
+  ): PngDocumentDiffView {
     return new PngDocumentDiffView(uri);
   }
 
-  private registerOpenDocument(document: vscode.CustomDocument) {
+  private registerOpenDocument(document: PngDocumentDiffView) {
     const roots = vscode.workspace.workspaceFolders?.map((f) => f.uri.path);
-    console.log(roots);
     if (!roots) {
       return;
     }
     const path = document.uri.path;
     console.log({ roots, path, s: document.uri.scheme });
     if (document.uri.scheme === "file") {
-      // TODO: What on dispose?
+      document.onDispose(() => {
+        this.openFileDocMap.delete(path);
+      });
       this.openFileDocMap.set(path, document);
     }
+
     // TODO: Event system to prevent race conditions when opening diff
   }
 
@@ -149,7 +145,7 @@ export class ImageDiffViewer implements vscode.CustomReadonlyEditorProvider {
   }
 
   async resolveCustomEditor(
-    document: vscode.CustomDocument,
+    document: PngDocumentDiffView,
     webviewPanel: vscode.WebviewPanel,
     token: vscode.CancellationToken
   ): Promise<void> {
@@ -187,8 +183,14 @@ export class ImageDiffViewer implements vscode.CustomReadonlyEditorProvider {
 }
 
 class PngDocumentDiffView implements vscode.CustomDocument {
+  private disposeEmitter = new vscode.EventEmitter<void>();
+  public onDispose = this.disposeEmitter.event;
+
   constructor(public uri: vscode.Uri) {}
+
   dispose(): void {
+    this.disposeEmitter.fire();
+    this.disposeEmitter.dispose();
     throw new Error("Method not implemented.");
   }
 }
