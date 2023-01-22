@@ -5,7 +5,7 @@ import { WebviewToHostMessages } from "./webview/shared";
 
 type GetHtmlArgs = {
   panel: vscode.WebviewPanel;
-  document?: vscode.CustomDocument;
+  document: PngDocumentDiffView;
   diffTarget?: vscode.CustomDocument;
   context: vscode.ExtensionContext;
 };
@@ -13,25 +13,23 @@ type GetHtmlArgs = {
 async function getHtml({ panel, document, diffTarget, context }: GetHtmlArgs) {
   const webview = panel.webview;
   let diffUri = null;
-  if (document) {
-    if (diffTarget) {
-      try {
-        const a = await vscode.workspace.fs.readFile(diffTarget.uri);
-        const b = await vscode.workspace.fs.readFile(document.uri);
-        const aPng = PNG.sync.read(Buffer.from(a));
-        const bPng = PNG.sync.read(Buffer.from(b));
+  if (diffTarget) {
+    try {
+      const a = await vscode.workspace.fs.readFile(diffTarget.uri);
+      const b = await vscode.workspace.fs.readFile(document.uri);
+      const aPng = PNG.sync.read(Buffer.from(a));
+      const bPng = PNG.sync.read(Buffer.from(b));
 
-        if (aPng.width === bPng.width && aPng.height === bPng.height) {
-          const diff = new PNG({ width: aPng.width, height: bPng.height });
-          pixelMatch(aPng.data, bPng.data, diff.data, aPng.width, aPng.height, {
-            alpha: 0,
-          });
-          const diffBuff = PNG.sync.write(diff);
-          diffUri = `data:image/png;base64, ${diffBuff.toString("base64")}`;
-        }
-      } catch (err) {
-        console.error(err);
+      if (aPng.width === bPng.width && aPng.height === bPng.height) {
+        const diff = new PNG({ width: aPng.width, height: bPng.height });
+        pixelMatch(aPng.data, bPng.data, diff.data, aPng.width, aPng.height, {
+          alpha: 0,
+        });
+        const diffBuff = PNG.sync.write(diff);
+        diffUri = `data:image/png;base64, ${diffBuff.toString("base64")}`;
       }
+    } catch (err) {
+      console.error(err);
     }
   }
   const scriptUri = webview.asWebviewUri(
@@ -54,16 +52,9 @@ async function getHtml({ panel, document, diffTarget, context }: GetHtmlArgs) {
         <title>Image diff</title>
       </head>
       <body>
-        ${
-          document
-            ? `
-          <p>
-          ${document.uri.toString()} | 
-          ${document.uri.path}
-          </p>
-        `
-            : ""
-        }
+        <p>
+          ${document.uri.toString()} <br/> ${document.uri.path}
+        </p>
         ${
           diffUri
             ? `
@@ -78,15 +69,7 @@ async function getHtml({ panel, document, diffTarget, context }: GetHtmlArgs) {
   `;
 }
 
-export async function initWebview(
-  panel: vscode.WebviewPanel,
-  context: vscode.ExtensionContext
-) {
-  panel.title = "This is shown to user?";
-  panel.webview.html = await getHtml({ panel, context });
-}
-
-export class ImageDiffViewer implements vscode.CustomReadonlyEditorProvider {
+export class ImageDiffViewer implements vscode.CustomReadonlyEditorProvider<PngDocumentDiffView> {
   public static viewType = "image-diff.image-with-diff";
   public static register(context: vscode.ExtensionContext) {
     const provider = new ImageDiffViewer(context);
@@ -110,7 +93,7 @@ export class ImageDiffViewer implements vscode.CustomReadonlyEditorProvider {
     openContext: vscode.CustomDocumentOpenContext,
     token: vscode.CancellationToken
   ): PngDocumentDiffView {
-    return new PngDocumentDiffView(uri);
+    return new PngDocumentDiffView(uri, openContext.untitledDocumentData);
   }
 
   private registerOpenDocument(document: PngDocumentDiffView) {
@@ -127,7 +110,7 @@ export class ImageDiffViewer implements vscode.CustomReadonlyEditorProvider {
       this.openFileDocMap.set(path, document);
     }
 
-    // TODO: Event system to prevent race conditions when opening diff
+    // TODO: Event system to prevent race conditions when opening diff?
   }
 
   private async getDiffTarget(
@@ -161,17 +144,6 @@ export class ImageDiffViewer implements vscode.CustomReadonlyEditorProvider {
       diffTarget,
       context: this.context,
     });
-
-    webviewPanel.onDidChangeViewState(async () => {
-      webviewPanel.title = "This is shown to user?";
-      webviewPanel.webview.html = await getHtml({
-        panel: webviewPanel,
-        document,
-        diffTarget,
-        context: this.context,
-      });
-    });
-
     webviewPanel.webview.onDidReceiveMessage(async (message: WebviewToHostMessages) => {
       if (message.type !== 'ready') {
         throw new Error('Unsupported message');
@@ -185,12 +157,17 @@ export class ImageDiffViewer implements vscode.CustomReadonlyEditorProvider {
 class PngDocumentDiffView implements vscode.CustomDocument {
   private disposeEmitter = new vscode.EventEmitter<void>();
   public onDispose = this.disposeEmitter.event;
+  data: Thenable<Uint8Array>;
 
-  constructor(public uri: vscode.Uri) {}
+  constructor(public uri: vscode.Uri, untitledData: Uint8Array | undefined) {
+    if (untitledData) {
+      this.data = Promise.resolve(untitledData);
+    }
+    this.data = vscode.workspace.fs.readFile(uri);
+  }
 
   dispose(): void {
     this.disposeEmitter.fire();
     this.disposeEmitter.dispose();
-    throw new Error("Method not implemented.");
   }
 }
