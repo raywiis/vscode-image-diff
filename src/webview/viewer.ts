@@ -85,20 +85,25 @@ window.addEventListener("message", (message) => {
     stopDrag(event.clientX, event.clientY);
   });
 
+  const MIN_SCALE = 0.4;
+
   document.body.addEventListener('wheel', (event) => {
     const delta = event.deltaY * 0.01;
+    const nextScale = scale - delta;
 
-    const s = (scale - delta) / scale;
+    if (Math.max(nextScale, MIN_SCALE) === MIN_SCALE) {
+      return;
+    }
+
+    const s = nextScale / scale;
     const cx = event.clientX;
     const cy = event.clientY;
     const lx = -initialX;
     const ly = -initialY;
+
     initialX = -((cx + lx) * s - cx);
     initialY = -((cy + ly) * s - cy);
-
-    scale -= delta;
-
-    console.log({ scale, cx, cy, initialX, initialY });
+    scale = nextScale;
 
     setTransform(initialX, initialY);
   });
