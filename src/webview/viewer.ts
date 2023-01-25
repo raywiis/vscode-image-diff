@@ -1,31 +1,36 @@
 // @ts-expect-error
 const vscode = acquireVsCodeApi();
 
-const canvas = document.createElement('canvas');
-const ctx = canvas.getContext('2d');
-
-if  (!ctx) {
-  throw new Error('No context');
-}
-
 document.body.style.overflow = 'hidden';
 
 window.addEventListener("message", (message) => {
-  console.log('got', {message});
   if (message.data.type !== 'show_image') {
     throw new Error('Unsupported message');
   }
+
+  const scaleIndicator = document.createElement('div');
+  scaleIndicator.style.position='absolute';
+  scaleIndicator.style.right = '0';
+  scaleIndicator.style.bottom = '0';
+  scaleIndicator.style.zIndex = '10';
+  scaleIndicator.style.mixBlendMode = 'difference';
+
+  document.body.append(scaleIndicator);
+
   const d = message.data.image.data;
+
   const content = new Uint8Array(d);
   const blob = new Blob([content]);
   const objectUrl = URL.createObjectURL(blob);
+
   const image = document.createElement('img');
   document.body.appendChild(image);
   image.src = objectUrl;
   image.style.cursor = 'grab';
-  image.style.position='absolute';
+  image.style.position = 'absolute';
   image.style.top = '0';
   image.style.left = '0';
+  image.style.transformOrigin = 'top left';
 
   let drag = false;
   let initialX = 0;
@@ -36,15 +41,35 @@ window.addEventListener("message", (message) => {
 
   let scale = 1;
 
-  image.style.transformOrigin = 'top left';
-  const setTransform = (x: number, y: number) => {
-    image.style.transform = `matrix(${scale}, 0, 0, ${scale}, ${x}, ${y})`;
+  scaleIndicator.innerText = `Scale: ${scale.toFixed(4)}`;
+  const setTransform = (x: number, y: number, newScale: number) => {
+    const onScreenWidth = image.clientWidth * scale;
+    const onScreenHeight = image.clientHeight * scale;
+
+    const minX = Math.min(0, window.innerWidth - onScreenWidth);
+    const maxX = Math.max(0, window.innerWidth - onScreenWidth);
+    const minY = Math.min(0, window.innerHeight - onScreenHeight);
+    const maxY = Math.max(0, window.innerHeight - onScreenHeight);
+
+    initialX = clamp(minX, maxX, x);
+    initialY = clamp(minY, maxY, y);
+
+    scale = newScale;
+    scaleIndicator.innerText = `Scale: ${scale.toFixed(4)}`;
+
+    image.style.transform = `matrix(${scale}, 0, 0, ${scale}, ${initialX}, ${initialY})`;
+  };
+
+  const clamp = (min: number, max: number, target: number) => {
+    return Math.min(Math.max(min, target), max);
   };
 
   const updateDrag = (dragX: number, dragY: number) => {
     const translateX = (initialX + dragX - dragStartX);
     const translateY = (initialY + dragY - dragStartY);
-    setTransform(translateX, translateY);
+    dragStartX = dragX;
+    dragStartY = dragY;
+    setTransform(translateX, translateY, scale);
   };
 
   const startDrag = (x: number, y: number) => {
@@ -58,8 +83,6 @@ window.addEventListener("message", (message) => {
     drag = false;
     image.style.cursor = 'grab';
     updateDrag(x, y);
-    initialX += x - dragStartX;
-    initialY += y - dragStartY;
   };
 
   document.body.addEventListener('mousedown', (event) => {
@@ -108,7 +131,7 @@ window.addEventListener("message", (message) => {
     initialY = -((cy + ly) * s - cy);
     scale = nextScale;
 
-    setTransform(initialX, initialY);
+    setTransform(initialX, initialY, scale);
   });
 
 
