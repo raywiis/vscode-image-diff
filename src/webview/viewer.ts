@@ -3,10 +3,12 @@ const vscode = acquireVsCodeApi();
 
 document.body.style.overflow = 'hidden';
 
-window.addEventListener("message", (message) => {
-  if (message.data.type !== 'show_image') {
-    throw new Error('Unsupported message');
-  }
+const features = {
+  reportTransform: false,
+}
+
+function showImage(message: any) {
+  // TODO: Use the shared types...
 
   const scaleIndicator = document.createElement('div');
   scaleIndicator.style.position='absolute';
@@ -21,6 +23,7 @@ window.addEventListener("message", (message) => {
 
   const content = new Uint8Array(d);
   const blob = new Blob([content]);
+  // TODO: Drop in the image through tht html
   const objectUrl = URL.createObjectURL(blob);
 
   const image = document.createElement('img');
@@ -42,9 +45,9 @@ window.addEventListener("message", (message) => {
   let scale = 1;
 
   scaleIndicator.innerText = `Scale: ${scale.toFixed(4)}`;
-  const setTransform = (x: number, y: number, newScale: number) => {
-    const onScreenWidth = image.clientWidth * scale;
-    const onScreenHeight = image.clientHeight * scale;
+  const setTransform = (x: number, y: number, newScale: number, { silent = false } = {}) => {
+    const onScreenWidth = image.clientWidth * newScale;
+    const onScreenHeight = image.clientHeight * newScale;
 
     const minX = Math.min(0, window.innerWidth - onScreenWidth);
     const maxX = Math.max(0, window.innerWidth - onScreenWidth);
@@ -58,6 +61,9 @@ window.addEventListener("message", (message) => {
     scaleIndicator.innerText = `Scale: ${scale.toFixed(4)}`;
 
     image.style.transform = `matrix(${scale}, 0, 0, ${scale}, ${initialX}, ${initialY})`;
+    if (features.reportTransform && !silent) {
+      vscode.postMessage({ type: 'transform', data: {x: initialX, y: initialY, scale }});
+    }
   };
 
   const clamp = (min: number, max: number, target: number) => {
@@ -134,7 +140,23 @@ window.addEventListener("message", (message) => {
     setTransform(initialX, initialY, scale);
   });
 
+  return { setTransform };
+}
 
+let imageApi: ReturnType<typeof showImage> | undefined;
+window.addEventListener("message", (message) => {
+  if (message.data.type === 'show_image') {
+    imageApi = showImage(message);
+  } else if (message.data.type === 'enable_transform_report') {
+    features.reportTransform = true;
+  } else if (message.data.type === 'transform') {
+    if (!imageApi) {
+      throw new Error('No setTransform');
+    }
+    imageApi.setTransform(message.data.data.x, message.data.data.y, message.data.data.scale, { silent: true });
+  } else {
+    throw new Error('Unsupported message');
+  }
 });
 
 vscode.postMessage({ type: "ready" });

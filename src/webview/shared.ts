@@ -7,10 +7,22 @@ export type ShowImageMessage = {
   }
 };
 
+export type EnableTransformReport = {
+  type: 'enable_transform_report'
+};
+
+export type TransformWebviewMessage = {
+  type: 'transform', data: { x: number, y: number, scale: number }
+};
+
 export type WebviewReadyMessage = {
   type: 'ready';
 };
 
-export type HostToWebviewMessages = ShowImageMessage;
+export type WebviewTransformMessage = {
+  type: 'transform', data: { x: number, y: number, scale: number }
+};
 
-export type WebviewToHostMessages = WebviewReadyMessage;
+export type HostToWebviewMessages = ShowImageMessage | TransformWebviewMessage;
+
+export type WebviewToHostMessages = WebviewReadyMessage | WebviewTransformMessage;

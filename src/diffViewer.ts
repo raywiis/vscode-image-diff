@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
 import * as pixelMatch from "pixelmatch";
 import { PNG } from "pngjs";
-import { WebviewToHostMessages } from "./webview/shared";
+import { ShowImageMessage, WebviewToHostMessages } from "./webview/shared";
 
 type GetHtmlArgs = {
   panel: vscode.WebviewPanel;
@@ -43,11 +43,9 @@ async function getHtml({ panel, document, diffTarget, context }: GetHtmlArgs) {
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <meta
           http-equiv="Content-Security-Policy"
-          content="default-src 'none'; img-src ${
-            webview.cspSource
-          } blob: data:; style-src ${webview.cspSource}; script-src ${
-    webview.cspSource
-  }"
+          content="default-src 'none'; img-src ${webview.cspSource
+    } blob: data:; style-src ${webview.cspSource}; script-src ${webview.cspSource
+    }"
         >
         <title>Image diff</title>
       </head>
@@ -55,14 +53,13 @@ async function getHtml({ panel, document, diffTarget, context }: GetHtmlArgs) {
         <p>
           ${document.uri.toString()} <br/> ${document.uri.path}
         </p>
-        ${
-          diffUri
-            ? `
+        ${diffUri
+      ? `
         <p>${diffUri}</p>
           <img src="${diffUri}"/>
         `
-            : ""
-        }
+      : ""
+    }
         <script src="${scriptUri}"></script>
       </body>
     </html>
@@ -83,7 +80,9 @@ export class ImageDiffViewer implements vscode.CustomReadonlyEditorProvider<PngD
     return registration;
   }
 
-  openFileDocMap = new Map<string, vscode.CustomDocument>();
+  openFileDocMap = new Map<string, PngDocumentDiffView>();
+  openFileWebviewPanelMap = new Map<string, vscode.WebviewPanel>();
+
   constructor(private context: vscode.ExtensionContext) {
     context.extensionUri;
   }
@@ -96,35 +95,36 @@ export class ImageDiffViewer implements vscode.CustomReadonlyEditorProvider<PngD
     return new PngDocumentDiffView(uri, openContext.untitledDocumentData);
   }
 
-  private registerOpenDocument(document: PngDocumentDiffView) {
+  private registerOpenDocument(document: PngDocumentDiffView, webviewPanel: vscode.WebviewPanel) {
     const roots = vscode.workspace.workspaceFolders?.map((f) => f.uri.path);
     if (!roots) {
       return;
     }
     const path = document.uri.path;
-    console.log({ roots, path, s: document.uri.scheme });
     if (document.uri.scheme === "file") {
       document.onDispose(() => {
         this.openFileDocMap.delete(path);
+        this.openFileWebviewPanelMap.delete(path);
       });
       this.openFileDocMap.set(path, document);
+      this.openFileWebviewPanelMap.set(path, webviewPanel);
     }
 
     // TODO: Event system to prevent race conditions when opening diff?
   }
 
   private async getDiffTarget(
-    document: vscode.CustomDocument
-  ): Promise<vscode.CustomDocument | undefined> {
-    console.log("diff target", { document });
+    document: PngDocumentDiffView
+  ) {
     await new Promise<void>((r) =>
       setTimeout(() => {
         r();
       }, 10)
     );
     if (document.uri.scheme === "git") {
-      return this.openFileDocMap.get(document.uri.path);
+      return [this.openFileDocMap.get(document.uri.path), this.openFileWebviewPanelMap.get(document.uri.path)] as const;
     }
+    return [undefined, undefined] as const;
   }
 
   async resolveCustomEditor(
@@ -132,8 +132,8 @@ export class ImageDiffViewer implements vscode.CustomReadonlyEditorProvider<PngD
     webviewPanel: vscode.WebviewPanel,
     token: vscode.CancellationToken
   ): Promise<void> {
-    this.registerOpenDocument(document);
-    const diffTarget = await this.getDiffTarget(document);
+    this.registerOpenDocument(document, webviewPanel);
+    const [diffTarget, diffWebview] = await this.getDiffTarget(document);
     webviewPanel.title = "This is shown to user?";
     webviewPanel.webview.options = {
       enableScripts: true,
@@ -144,18 +144,37 @@ export class ImageDiffViewer implements vscode.CustomReadonlyEditorProvider<PngD
       diffTarget,
       context: this.context,
     });
+    let otherView = diffWebview;
+    document.onWebviewOpen(newPanel => {
+      otherView = newPanel;
+    });
     webviewPanel.webview.onDidReceiveMessage(async (message: WebviewToHostMessages) => {
-      if (message.type !== 'ready') {
+      if (message.type === 'ready') {
+        const image = await vscode.workspace.fs.readFile(document.uri);
+        webviewPanel.webview.postMessage({
+          type: 'show_image',
+          image,
+        });
+        webviewPanel.webview.postMessage({ type: 'enable_transform_report' });
+        diffTarget?.registerNewWebview(webviewPanel);
+        if (diffWebview) {
+          diffWebview.webview.postMessage({ type: 'enable_transform_report' });
+        }
+      } else if (message.type === 'transform') {
+        if (otherView) {
+          otherView.webview.postMessage({type: "transform", data: message.data });
+        }
+      } else {
         throw new Error('Unsupported message');
       }
-      const image = await vscode.workspace.fs.readFile(document.uri);
-      webviewPanel.webview.postMessage({ type: 'show_image', image });
     });
   }
 }
 
 class PngDocumentDiffView implements vscode.CustomDocument {
   private disposeEmitter = new vscode.EventEmitter<void>();
+  private newWebviewEmitter = new vscode.EventEmitter<vscode.WebviewPanel>();
+  public onWebviewOpen = this.newWebviewEmitter.event;
   public onDispose = this.disposeEmitter.event;
   data: Thenable<Uint8Array>;
 
@@ -166,7 +185,12 @@ class PngDocumentDiffView implements vscode.CustomDocument {
     this.data = vscode.workspace.fs.readFile(uri);
   }
 
+  registerNewWebview(webviewPanel: vscode.WebviewPanel) {
+    this.newWebviewEmitter.fire(webviewPanel);
+  }
+
   dispose(): void {
+    this.newWebviewEmitter.dispose();
     this.disposeEmitter.fire();
     this.disposeEmitter.dispose();
   }
