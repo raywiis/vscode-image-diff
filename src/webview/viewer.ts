@@ -133,11 +133,10 @@ function showImage(message: any) {
     const lx = -initialX;
     const ly = -initialY;
 
-    initialX = -((cx + lx) * s - cx);
-    initialY = -((cy + ly) * s - cy);
-    scale = nextScale;
+    const nextX = -((cx + lx) * s - cx);
+    const nextY = -((cy + ly) * s - cy);
 
-    setTransform(initialX, initialY, scale);
+    setTransform(nextX, nextY, nextScale);
   });
 
   return { setTransform };
