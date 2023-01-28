@@ -1,28 +1,31 @@
-
 export type ShowImageMessage = {
-  type: 'show_image',
+  type: "show_image";
   image: {
-    type: 'Buffer',
-    data: number[],
-  }
+    type: "Buffer";
+    data: number[];
+  };
 };
 
 export type EnableTransformReport = {
-  type: 'enable_transform_report'
+  type: "enable_transform_report";
 };
 
 export type TransformWebviewMessage = {
-  type: 'transform', data: { x: number, y: number, scale: number }
+  type: "transform";
+  data: { x: number; y: number; scale: number };
 };
 
 export type WebviewReadyMessage = {
-  type: 'ready';
+  type: "ready";
 };
 
 export type WebviewTransformMessage = {
-  type: 'transform', data: { x: number, y: number, scale: number }
+  type: "transform";
+  data: { x: number; y: number; scale: number };
 };
 
 export type HostToWebviewMessages = ShowImageMessage | TransformWebviewMessage;
 
-export type WebviewToHostMessages = WebviewReadyMessage | WebviewTransformMessage;
+export type WebviewToHostMessages =
+  | WebviewReadyMessage
+  | WebviewTransformMessage;

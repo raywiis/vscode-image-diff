@@ -1,21 +1,23 @@
+import "@bendera/vscode-webview-elements/dist/vscode-icon";
+
 // @ts-expect-error
 const vscode = acquireVsCodeApi();
 
-document.body.style.overflow = 'hidden';
+document.body.style.overflow = "hidden";
 
 const features = {
   reportTransform: false,
-}
+};
 
-function showImage(message: any) {
+function showImage(message) {
   // TODO: Use the shared types...
 
-  const scaleIndicator = document.createElement('div');
-  scaleIndicator.style.position='absolute';
-  scaleIndicator.style.right = '0';
-  scaleIndicator.style.bottom = '0';
-  scaleIndicator.style.zIndex = '10';
-  scaleIndicator.style.mixBlendMode = 'difference';
+  const scaleIndicator = document.createElement("div");
+  scaleIndicator.style.position = "absolute";
+  scaleIndicator.style.right = "0";
+  scaleIndicator.style.bottom = "0";
+  scaleIndicator.style.zIndex = "10";
+  scaleIndicator.style.mixBlendMode = "difference";
 
   document.body.append(scaleIndicator);
 
@@ -26,14 +28,14 @@ function showImage(message: any) {
   // TODO: Drop in the image through tht html
   const objectUrl = URL.createObjectURL(blob);
 
-  const image = document.createElement('img');
+  const image = document.createElement("img");
   document.body.appendChild(image);
   image.src = objectUrl;
-  image.style.cursor = 'grab';
-  image.style.position = 'absolute';
-  image.style.top = '0';
-  image.style.left = '0';
-  image.style.transformOrigin = 'top left';
+  image.style.cursor = "grab";
+  image.style.position = "absolute";
+  image.style.top = "0";
+  image.style.left = "0";
+  image.style.transformOrigin = "top left";
 
   let drag = false;
   let initialX = 0;
@@ -45,7 +47,7 @@ function showImage(message: any) {
   let scale = 1;
 
   scaleIndicator.innerText = `Scale: ${scale.toFixed(4)}`;
-  const setTransform = (x: number, y: number, newScale: number, { silent = false } = {}) => {
+  const setTransform = (x, y, newScale, { silent = false } = {}) => {
     const onScreenWidth = image.clientWidth * newScale;
     const onScreenHeight = image.clientHeight * newScale;
 
@@ -62,40 +64,43 @@ function showImage(message: any) {
 
     image.style.transform = `matrix(${scale}, 0, 0, ${scale}, ${initialX}, ${initialY})`;
     if (features.reportTransform && !silent) {
-      vscode.postMessage({ type: 'transform', data: {x: initialX, y: initialY, scale }});
+      vscode.postMessage({
+        type: "transform",
+        data: { x: initialX, y: initialY, scale },
+      });
     }
   };
 
-  const clamp = (min: number, max: number, target: number) => {
+  const clamp = (min, max, target) => {
     return Math.min(Math.max(min, target), max);
   };
 
-  const updateDrag = (dragX: number, dragY: number) => {
-    const translateX = (initialX + dragX - dragStartX);
-    const translateY = (initialY + dragY - dragStartY);
+  const updateDrag = (dragX, dragY) => {
+    const translateX = initialX + dragX - dragStartX;
+    const translateY = initialY + dragY - dragStartY;
     dragStartX = dragX;
     dragStartY = dragY;
     setTransform(translateX, translateY, scale);
   };
 
-  const startDrag = (x: number, y: number) => {
+  const startDrag = (x, y) => {
     drag = true;
-    image.style.cursor = 'grabbing';
+    image.style.cursor = "grabbing";
     dragStartX = x;
     dragStartY = y;
   };
 
-  const stopDrag = (x: number, y: number) => {
+  const stopDrag = (x, y) => {
     drag = false;
-    image.style.cursor = 'grab';
+    image.style.cursor = "grab";
     updateDrag(x, y);
   };
 
-  document.body.addEventListener('mousedown', (event) => {
+  document.body.addEventListener("mousedown", (event) => {
     startDrag(event.clientX, event.clientY);
   });
 
-  document.body.addEventListener('mousemove', (event) => {
+  document.body.addEventListener("mousemove", (event) => {
     if (!drag) {
       return;
     }
@@ -103,14 +108,14 @@ function showImage(message: any) {
     updateDrag(event.clientX, event.clientY);
   });
 
-  document.body.addEventListener('mouseup', (event) => {
+  document.body.addEventListener("mouseup", (event) => {
     if (!drag) {
       return;
     }
     stopDrag(event.clientX, event.clientY);
   });
 
-  document.body.addEventListener('mouseleave', (event) => {
+  document.body.addEventListener("mouseleave", (event) => {
     if (!drag) {
       return;
     }
@@ -119,7 +124,7 @@ function showImage(message: any) {
 
   const MIN_SCALE = 0.4;
 
-  image.addEventListener('wheel', (event) => {
+  image.addEventListener("wheel", (event) => {
     const delta = event.deltaY * 0.01;
     const nextScale = scale - delta;
 
@@ -142,19 +147,24 @@ function showImage(message: any) {
   return { setTransform };
 }
 
-let imageApi: ReturnType<typeof showImage> | undefined;
+let imageApi;
 window.addEventListener("message", (message) => {
-  if (message.data.type === 'show_image') {
+  if (message.data.type === "show_image") {
     imageApi = showImage(message);
-  } else if (message.data.type === 'enable_transform_report') {
+  } else if (message.data.type === "enable_transform_report") {
     features.reportTransform = true;
-  } else if (message.data.type === 'transform') {
+  } else if (message.data.type === "transform") {
     if (!imageApi) {
-      throw new Error('No setTransform');
+      throw new Error("No setTransform");
     }
-    imageApi.setTransform(message.data.data.x, message.data.data.y, message.data.data.scale, { silent: true });
+    imageApi.setTransform(
+      message.data.data.x,
+      message.data.data.y,
+      message.data.data.scale,
+      { silent: true }
+    );
   } else {
-    throw new Error('Unsupported message');
+    throw new Error("Unsupported message");
   }
 });
 

@@ -12,6 +12,15 @@ type GetHtmlArgs = {
 
 async function getHtml({ panel, document, diffTarget, context }: GetHtmlArgs) {
   const webview = panel.webview;
+  const codiconsUri = webview.asWebviewUri(
+    vscode.Uri.joinPath(
+      context.extensionUri,
+      "node_modules",
+      "@vscode/codicons",
+      "dist",
+      "codicon.css"
+    )
+  );
   let diffUri = null;
   if (diffTarget) {
     try {
@@ -43,30 +52,37 @@ async function getHtml({ panel, document, diffTarget, context }: GetHtmlArgs) {
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <meta
           http-equiv="Content-Security-Policy"
-          content="default-src 'none'; img-src ${webview.cspSource
-    } blob: data:; style-src ${webview.cspSource}; script-src ${webview.cspSource
-    }"
+          content="default-src 'none'; img-src ${
+            webview.cspSource
+          } blob: data:; style-src ${webview.cspSource}; script-src ${
+    webview.cspSource
+  }; font-src ${webview.cspSource};"
         >
         <title>Image diff</title>
+        <link href="${codiconsUri}" rel="stylesheet"/>
       </head>
       <body>
         <p>
           ${document.uri.toString()} <br/> ${document.uri.path}
         </p>
-        ${diffUri
-      ? `
+        ${
+          diffUri
+            ? `
         <p>${diffUri}</p>
           <img src="${diffUri}"/>
         `
-      : ""
-    }
+            : ""
+        }
         <script src="${scriptUri}"></script>
+        <div class="icon"><i class="codicon codicon-account"></i> account</div>
       </body>
     </html>
   `;
 }
 
-export class ImageDiffViewer implements vscode.CustomReadonlyEditorProvider<PngDocumentDiffView> {
+export class ImageDiffViewer
+  implements vscode.CustomReadonlyEditorProvider<PngDocumentDiffView>
+{
   public static viewType = "image-diff.image-with-diff";
   public static register(context: vscode.ExtensionContext) {
     const provider = new ImageDiffViewer(context);
@@ -95,7 +111,10 @@ export class ImageDiffViewer implements vscode.CustomReadonlyEditorProvider<PngD
     return new PngDocumentDiffView(uri, openContext.untitledDocumentData);
   }
 
-  private registerOpenDocument(document: PngDocumentDiffView, webviewPanel: vscode.WebviewPanel) {
+  private registerOpenDocument(
+    document: PngDocumentDiffView,
+    webviewPanel: vscode.WebviewPanel
+  ) {
     const roots = vscode.workspace.workspaceFolders?.map((f) => f.uri.path);
     if (!roots) {
       return;
@@ -111,16 +130,17 @@ export class ImageDiffViewer implements vscode.CustomReadonlyEditorProvider<PngD
     }
   }
 
-  private async getDiffTarget(
-    document: PngDocumentDiffView
-  ) {
+  private async getDiffTarget(document: PngDocumentDiffView) {
     await new Promise<void>((r) =>
       setTimeout(() => {
         r();
       }, 10)
     );
     if (document.uri.scheme === "git") {
-      return [this.openFileDocMap.get(document.uri.path), this.openFileWebviewPanelMap.get(document.uri.path)] as const;
+      return [
+        this.openFileDocMap.get(document.uri.path),
+        this.openFileWebviewPanelMap.get(document.uri.path),
+      ] as const;
     }
     return [undefined, undefined] as const;
   }
@@ -143,29 +163,36 @@ export class ImageDiffViewer implements vscode.CustomReadonlyEditorProvider<PngD
       context: this.context,
     });
     let otherView = diffWebview;
-    document.onWebviewOpen(newPanel => {
+    document.onWebviewOpen((newPanel) => {
       otherView = newPanel;
     });
-    webviewPanel.webview.onDidReceiveMessage(async (message: WebviewToHostMessages) => {
-      if (message.type === 'ready') {
-        const image = await vscode.workspace.fs.readFile(document.uri);
-        webviewPanel.webview.postMessage({
-          type: 'show_image',
-          image,
-        });
-        webviewPanel.webview.postMessage({ type: 'enable_transform_report' });
-        diffTarget?.registerNewWebview(webviewPanel);
-        if (diffWebview) {
-          diffWebview.webview.postMessage({ type: 'enable_transform_report' });
+    webviewPanel.webview.onDidReceiveMessage(
+      async (message: WebviewToHostMessages) => {
+        if (message.type === "ready") {
+          const image = await vscode.workspace.fs.readFile(document.uri);
+          webviewPanel.webview.postMessage({
+            type: "show_image",
+            image,
+          });
+          webviewPanel.webview.postMessage({ type: "enable_transform_report" });
+          diffTarget?.registerNewWebview(webviewPanel);
+          if (diffWebview) {
+            diffWebview.webview.postMessage({
+              type: "enable_transform_report",
+            });
+          }
+        } else if (message.type === "transform") {
+          if (otherView) {
+            otherView.webview.postMessage({
+              type: "transform",
+              data: message.data,
+            });
+          }
+        } else {
+          throw new Error("Unsupported message");
         }
-      } else if (message.type === 'transform') {
-        if (otherView) {
-          otherView.webview.postMessage({type: "transform", data: message.data });
-        }
-      } else {
-        throw new Error('Unsupported message');
       }
-    });
+    );
   }
 }
 
