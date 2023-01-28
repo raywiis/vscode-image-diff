@@ -109,8 +109,6 @@ export class ImageDiffViewer implements vscode.CustomReadonlyEditorProvider<PngD
       this.openFileDocMap.set(path, document);
       this.openFileWebviewPanelMap.set(path, webviewPanel);
     }
-
-    // TODO: Event system to prevent race conditions when opening diff?
   }
 
   private async getDiffTarget(
