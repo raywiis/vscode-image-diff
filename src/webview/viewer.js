@@ -7,7 +7,7 @@ const features = {
   reportTransform: false,
 };
 
-function showImage(message) {
+function showImage() {
   // TODO: Use the shared types...
 
   const scaleIndicator = document.createElement("div");
@@ -22,14 +22,6 @@ function showImage(message) {
   const image = document.getElementById("main-image");
   if (!(image instanceof HTMLImageElement)) {
     throw new Error("Element with id 'main-image' isn't an image element");
-  }
-
-  const imageData = message.data.image.data;
-  if (imageData) {
-    const content = new Uint8Array(imageData);
-    const blob = new Blob([content]);
-    const objectUrl = URL.createObjectURL(blob);
-    image.src = objectUrl;
   }
 
   document.body.appendChild(image);
@@ -159,7 +151,7 @@ function showImage(message) {
 let imageApi;
 window.addEventListener("message", (message) => {
   if (message.data.type === "show_image") {
-    imageApi = showImage(message);
+    imageApi = showImage();
   } else if (message.data.type === "enable_transform_report") {
     features.reportTransform = true;
   } else if (message.data.type === "transform") {

@@ -61,7 +61,7 @@ async function getHtml({ panel, document, diffTarget, context }: GetHtmlArgs) {
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <meta
           http-equiv="Content-Security-Policy"
-          content="default-src 'none'; img-src ${
+          content="default-src 'none'; img-src * ${
             webview.cspSource
           } blob: data:; style-src ${webview.cspSource}; script-src ${
     webview.cspSource
@@ -166,6 +166,18 @@ export class ImageDiffViewer
     webviewPanel.title = "This is shown to user?";
     webviewPanel.webview.options = {
       enableScripts: true,
+      localResourceRoots: [
+        ...(webviewPanel.webview.options.localResourceRoots || []),
+        vscode.Uri.from({
+          scheme: "git",
+        }),
+        vscode.Uri.from({
+          scheme: "file",
+        }),
+        vscode.Uri.from({
+          scheme: "data",
+        }),
+      ],
     };
     webviewPanel.webview.html = await getHtml({
       panel: webviewPanel,
@@ -180,17 +192,9 @@ export class ImageDiffViewer
     webviewPanel.webview.onDidReceiveMessage(
       async (message: WebviewToHostMessages) => {
         if (message.type === "ready") {
-          if (document.uri.scheme !== "file://") {
-            const image = await vscode.workspace.fs.readFile(document.uri);
-            webviewPanel.webview.postMessage({
-              type: "show_image",
-              image,
-            });
-          } else {
-            webviewPanel.webview.postMessage({
-              type: "show_image",
-            });
-          }
+          webviewPanel.webview.postMessage({
+            type: "show_image",
+          });
           webviewPanel.webview.postMessage({ type: "enable_transform_report" });
           diffTarget?.registerNewWebview(webviewPanel);
           if (diffWebview) {
