@@ -19,28 +19,30 @@ function showImage(message) {
 
   document.body.append(scaleIndicator);
 
-  const d = message.data.image.data;
+  const image = document.getElementById("main-image");
+  if (!(image instanceof HTMLImageElement)) {
+    throw new Error("Element with id 'main-image' isn't an image element");
+  }
 
-  const content = new Uint8Array(d);
-  const blob = new Blob([content]);
-  // TODO: Drop in the image through tht html
-  const objectUrl = URL.createObjectURL(blob);
+  const imageData = message.data.image.data;
+  if (imageData) {
+    const content = new Uint8Array(imageData);
+    const blob = new Blob([content]);
+    const objectUrl = URL.createObjectURL(blob);
+    image.src = objectUrl;
+  }
 
-  const image = document.createElement("img");
   document.body.appendChild(image);
-  image.src = objectUrl;
   image.style.cursor = "grab";
   image.style.position = "absolute";
   image.style.top = "0";
   image.style.left = "0";
   image.style.transformOrigin = "top left";
 
-  image.addEventListener('load', () => {
+  image.addEventListener("load", () => {
     const width = `${image.naturalWidth}px`;
     const height = `${image.naturalHeight}px`;
     image.style.width = width;
-    image.style.maxWidth = width;
-    image.style.maxHeight = height;
     image.style.height = height;
   });
 

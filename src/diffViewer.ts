@@ -2,6 +2,7 @@ import * as vscode from "vscode";
 import * as pixelMatch from "pixelmatch";
 import { PNG } from "pngjs";
 import { ShowImageMessage, WebviewToHostMessages } from "./webview/shared";
+import { fstat } from "fs";
 
 type GetHtmlArgs = {
   panel: vscode.WebviewPanel;
@@ -44,6 +45,14 @@ async function getHtml({ panel, document, diffTarget, context }: GetHtmlArgs) {
   const scriptUri = webview.asWebviewUri(
     vscode.Uri.joinPath(context.extensionUri, "out", "webview", "viewer.js")
   );
+  const styleUri = vscode.Uri.joinPath(
+    context.extensionUri,
+    "src",
+    "webview",
+    "style.css"
+  );
+  const styleWebviewUri = panel.webview.asWebviewUri(styleUri);
+  const documentWebviewUri = panel.webview.asWebviewUri(document.uri);
   return `
     <!DOCTYPE html>
     <html lang="en">
@@ -60,8 +69,10 @@ async function getHtml({ panel, document, diffTarget, context }: GetHtmlArgs) {
         >
         <title>Image diff</title>
         <link href="${codiconsUri}" rel="stylesheet"/>
+        <link href="${styleWebviewUri}" rel="stylesheet"/>
       </head>
       <body>
+        <img id="main-image" src="${documentWebviewUri}" />
         <p>
           ${document.uri.toString()} <br/> ${document.uri.path}
         </p>
@@ -169,11 +180,17 @@ export class ImageDiffViewer
     webviewPanel.webview.onDidReceiveMessage(
       async (message: WebviewToHostMessages) => {
         if (message.type === "ready") {
-          const image = await vscode.workspace.fs.readFile(document.uri);
-          webviewPanel.webview.postMessage({
-            type: "show_image",
-            image,
-          });
+          if (document.uri.scheme !== "file://") {
+            const image = await vscode.workspace.fs.readFile(document.uri);
+            webviewPanel.webview.postMessage({
+              type: "show_image",
+              image,
+            });
+          } else {
+            webviewPanel.webview.postMessage({
+              type: "show_image",
+            });
+          }
           webviewPanel.webview.postMessage({ type: "enable_transform_report" });
           diffTarget?.registerNewWebview(webviewPanel);
           if (diffWebview) {
@@ -204,6 +221,7 @@ class PngDocumentDiffView implements vscode.CustomDocument {
   data: Thenable<Uint8Array>;
 
   constructor(public uri: vscode.Uri, untitledData: Uint8Array | undefined) {
+    // https://file%2B.vscode-resource.vscode-cdn.net/home/rejus/image-diff/src/collect-payment-spec-js-invoice-actions-should-open-charge-with-credit-card-dialog-for-draft-invoice-snap.png?version%3D1674999497292
     if (untitledData) {
       this.data = Promise.resolve(untitledData);
     }
