@@ -1,5 +1,3 @@
-import "@bendera/vscode-webview-elements/dist/vscode-icon";
-
 // @ts-expect-error
 const vscode = acquireVsCodeApi();
 
@@ -36,6 +34,15 @@ function showImage(message) {
   image.style.top = "0";
   image.style.left = "0";
   image.style.transformOrigin = "top left";
+
+  image.addEventListener('load', () => {
+    const width = `${image.naturalWidth}px`;
+    const height = `${image.naturalHeight}px`;
+    image.style.width = width;
+    image.style.maxWidth = width;
+    image.style.maxHeight = height;
+    image.style.height = height;
+  });
 
   let drag = false;
   let initialX = 0;
