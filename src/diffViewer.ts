@@ -1,8 +1,8 @@
 import * as vscode from "vscode";
 import * as pixelMatch from "pixelmatch";
 import { PNG } from "pngjs";
-import { ShowImageMessage, WebviewToHostMessages } from "./webview/shared";
-import { fstat } from "fs";
+import { WebviewToHostMessages } from "./webview/shared";
+import { dirname } from 'node:path';
 
 type GetHtmlArgs = {
   panel: vscode.WebviewPanel;
@@ -47,7 +47,7 @@ async function getHtml({ panel, document, diffTarget, context }: GetHtmlArgs) {
   );
   const styleUri = vscode.Uri.joinPath(
     context.extensionUri,
-    "src",
+    "out",
     "webview",
     "style.css"
   );
@@ -61,11 +61,9 @@ async function getHtml({ panel, document, diffTarget, context }: GetHtmlArgs) {
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <meta
           http-equiv="Content-Security-Policy"
-          content="default-src 'none'; img-src * ${
-            webview.cspSource
-          } blob: data:; style-src ${webview.cspSource}; script-src ${
-    webview.cspSource
-  }; font-src ${webview.cspSource};"
+          content="default-src 'none'; img-src * ${webview.cspSource
+    } blob: data:; style-src ${webview.cspSource}; script-src ${webview.cspSource
+    }; font-src ${webview.cspSource};"
         >
         <title>Image diff</title>
         <link href="${codiconsUri}" rel="stylesheet"/>
@@ -76,16 +74,21 @@ async function getHtml({ panel, document, diffTarget, context }: GetHtmlArgs) {
         <p>
           ${document.uri.toString()} <br/> ${document.uri.path}
         </p>
-        ${
-          diffUri
-            ? `
+        ${diffUri
+      ? `
         <p>${diffUri}</p>
           <img src="${diffUri}"/>
         `
-            : ""
-        }
+      : ""
+    }
         <script src="${scriptUri}"></script>
-        <div class="icon"><i class="codicon codicon-account"></i> account</div>
+        <div id="controls">
+          <vscode-radio-group direction="vertical">
+            <vscode-radio>Fit</vscode-radio>
+            <vscode-radio>Natural</vscode-radio>
+          </vscode-radio-group>
+          <vscode-checkbox id="sync-checkbox">Sync views</vscode-checkbox>
+        </div>
       </body>
     </html>
   `;
@@ -163,22 +166,30 @@ export class ImageDiffViewer
   ): Promise<void> {
     this.registerOpenDocument(document, webviewPanel);
     const [diffTarget, diffWebview] = await this.getDiffTarget(document);
+
+    const getRootUri = (uri: vscode.Uri) => {
+      const dirPath = dirname(uri.path);
+      const rootUri = uri.with({ path: dirPath });
+      return rootUri;
+    };
+
     webviewPanel.title = "This is shown to user?";
+    const localResourceRoots = [
+      getRootUri(document.uri),
+      vscode.Uri.joinPath(
+        this.context.extensionUri,
+        "node_modules",
+        "@vscode/codicons",
+        "dist"
+      ),
+      vscode.Uri.joinPath(this.context.extensionUri, "out", "webview"),
+    ];
+
     webviewPanel.webview.options = {
       enableScripts: true,
-      localResourceRoots: [
-        ...(webviewPanel.webview.options.localResourceRoots || []),
-        vscode.Uri.from({
-          scheme: "git",
-        }),
-        vscode.Uri.from({
-          scheme: "file",
-        }),
-        vscode.Uri.from({
-          scheme: "data",
-        }),
-      ],
+      localResourceRoots,
     };
+    console.log(webviewPanel.webview.options.localResourceRoots);
     webviewPanel.webview.html = await getHtml({
       panel: webviewPanel,
       document,

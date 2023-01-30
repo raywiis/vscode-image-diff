@@ -1,3 +1,8 @@
+import "./style.css";
+import { provideVSCodeDesignSystem, vsCodeButton, vsCodeCheckbox, vsCodeRadio, vsCodeRadioGroup } from "@vscode/webview-ui-toolkit";
+
+provideVSCodeDesignSystem().register(vsCodeButton(), vsCodeCheckbox(), vsCodeRadio(), vsCodeRadioGroup());
+
 // @ts-expect-error
 const vscode = acquireVsCodeApi();
 
