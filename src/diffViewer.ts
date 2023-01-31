@@ -49,7 +49,7 @@ async function getHtml({ panel, document, diffTarget, context }: GetHtmlArgs) {
     context.extensionUri,
     "out",
     "webview",
-    "style.css"
+    "viewer.css"
   );
   const styleWebviewUri = panel.webview.asWebviewUri(styleUri);
   const documentWebviewUri = panel.webview.asWebviewUri(document.uri);
@@ -189,7 +189,6 @@ export class ImageDiffViewer
       enableScripts: true,
       localResourceRoots,
     };
-    console.log(webviewPanel.webview.options.localResourceRoots);
     webviewPanel.webview.html = await getHtml({
       panel: webviewPanel,
       document,

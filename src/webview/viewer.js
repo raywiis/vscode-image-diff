@@ -1,4 +1,4 @@
-import "./style.css";
+import "./viewer.css";
 import { provideVSCodeDesignSystem, vsCodeButton, vsCodeCheckbox, vsCodeRadio, vsCodeRadioGroup } from "@vscode/webview-ui-toolkit";
 
 provideVSCodeDesignSystem().register(vsCodeButton(), vsCodeCheckbox(), vsCodeRadio(), vsCodeRadioGroup());

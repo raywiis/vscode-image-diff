@@ -41,10 +41,10 @@
     "pretest": "yarn run compile && yarn run lint",
     "lint": "eslint src --ext ts",
     "test": "node ./out/test/runTest.js",
-    "fmt": "prettier --write src"
+    "fmt": "prettier --write src",
+    "pack:webview": "esbuild src/webview/viewer.js --bundle --outfile=out/webview/viewer.js"
   },
   "devDependencies": {
-    "@rollup/plugin-node-resolve": "^15.0.1",
     "@types/glob": "^8.0.0",
     "@types/mocha": "^10.0.1",
     "@types/node": "16.x",
@@ -53,20 +53,18 @@
     "@typescript-eslint/eslint-plugin": "^5.45.0",
     "@typescript-eslint/parser": "^5.45.0",
     "@vscode/test-electron": "^2.2.0",
+    "esbuild": "^0.17.5",
     "eslint": "^8.28.0",
     "glob": "^8.0.3",
     "mocha": "^10.1.0",
     "prettier": "^2.8.2",
-    "rollup": "^3.12.0",
     "typescript": "^4.9.3"
   },
   "dependencies": {
-    "@rollup/plugin-typescript": "^11.0.0",
     "@types/pngjs": "^6.0.1",
     "@vscode/codicons": "^0.0.32",
     "@vscode/webview-ui-toolkit": "^1.2.1",
     "pixelmatch": "^5.3.0",
-    "pngjs": "^6.0.0",
-    "rollup-plugin-css-only": "^4.3.0"
+    "pngjs": "^6.0.0"
   }
 }
