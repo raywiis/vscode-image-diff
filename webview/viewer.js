@@ -15,6 +15,8 @@ const features = {
 function showImage() {
   // TODO: Use the shared types...
 
+
+
   const scaleIndicator = document.createElement("div");
   scaleIndicator.style.position = "absolute";
   scaleIndicator.style.right = "0";

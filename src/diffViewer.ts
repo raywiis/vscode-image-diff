@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
 import * as pixelMatch from "pixelmatch";
 import { PNG } from "pngjs";
-import { WebviewToHostMessages } from "./webview/shared";
+import { WebviewToHostMessages } from "../webview/shared";
 import { dirname } from 'node:path';
 
 type GetHtmlArgs = {
@@ -22,7 +22,7 @@ async function getHtml({ panel, document, diffTarget, context }: GetHtmlArgs) {
       "codicon.css"
     )
   );
-  let diffUri = null;
+  let diffUri: string | undefined = undefined;
   if (diffTarget) {
     try {
       const a = await vscode.workspace.fs.readFile(diffTarget.uri);
