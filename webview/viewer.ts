@@ -15,8 +15,6 @@ const features = {
 function showImage() {
   // TODO: Use the shared types...
 
-
-
   const scaleIndicator = document.createElement("div");
   scaleIndicator.style.position = "absolute";
   scaleIndicator.style.right = "0";
@@ -55,7 +53,7 @@ function showImage() {
   let scale = 1;
 
   scaleIndicator.innerText = `Scale: ${scale.toFixed(4)}`;
-  const setTransform = (x, y, newScale, { silent = false } = {}) => {
+  const setTransform = (x: number, y: number, newScale: number, { silent = false } = {}) => {
     const onScreenWidth = image.clientWidth * newScale;
     const onScreenHeight = image.clientHeight * newScale;
 
@@ -79,11 +77,11 @@ function showImage() {
     }
   };
 
-  const clamp = (min, max, target) => {
+  const clamp = (min: number, max: number, target: number) => {
     return Math.min(Math.max(min, target), max);
   };
 
-  const updateDrag = (dragX, dragY) => {
+  const updateDrag = (dragX: number, dragY: number) => {
     const translateX = initialX + dragX - dragStartX;
     const translateY = initialY + dragY - dragStartY;
     dragStartX = dragX;
@@ -91,14 +89,14 @@ function showImage() {
     setTransform(translateX, translateY, scale);
   };
 
-  const startDrag = (x, y) => {
+  const startDrag = (x: number, y: number) => {
     drag = true;
     image.style.cursor = "grabbing";
     dragStartX = x;
     dragStartY = y;
   };
 
-  const stopDrag = (x, y) => {
+  const stopDrag = (x: number, y: number) => {
     drag = false;
     image.style.cursor = "grab";
     updateDrag(x, y);

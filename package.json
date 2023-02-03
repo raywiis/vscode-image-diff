@@ -42,8 +42,8 @@
     "lint": "eslint src --ext ts",
     "test": "node ./out/test/runTest.js",
     "fmt": "prettier --write src",
-    "pack:webview": "esbuild webview/viewer.js --bundle --outfile=out/webview/viewer.js",
-    "pack:webview:watch": "esbuild webview/viewer.js --watch --bundle --outfile=out/webview/viewer.js"
+    "pack:webview": "node ./esbuild.mjs",
+    "pack:webview:watch": "node ./esbuild.watch.mjs"
   },
   "devDependencies": {
     "@types/glob": "^8.0.0",
