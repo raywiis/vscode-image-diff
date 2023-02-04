@@ -2,7 +2,7 @@ import * as vscode from "vscode";
 import * as pixelMatch from "pixelmatch";
 import { PNG } from "pngjs";
 import { WebviewToHostMessages } from "../webview/shared";
-import { dirname } from 'node:path';
+import { dirname } from "node:path";
 
 type GetHtmlArgs = {
   panel: vscode.WebviewPanel;
@@ -61,9 +61,11 @@ async function getHtml({ panel, document, diffTarget, context }: GetHtmlArgs) {
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <meta
           http-equiv="Content-Security-Policy"
-          content="default-src 'none'; img-src * ${webview.cspSource
-    } blob: data:; style-src ${webview.cspSource}; script-src ${webview.cspSource
-    }; font-src ${webview.cspSource};"
+          content="default-src 'none'; img-src * ${
+            webview.cspSource
+          } blob: data:; style-src ${webview.cspSource}; script-src ${
+    webview.cspSource
+  }; font-src ${webview.cspSource};"
         >
         <title>Image diff</title>
         <link href="${codiconsUri}" rel="stylesheet"/>
@@ -74,13 +76,14 @@ async function getHtml({ panel, document, diffTarget, context }: GetHtmlArgs) {
         <p>
           ${document.uri.toString()} <br/> ${document.uri.path}
         </p>
-        ${diffUri
-      ? `
+        ${
+          diffUri
+            ? `
         <p>${diffUri}</p>
           <img src="${diffUri}"/>
         `
-      : ""
-    }
+            : ""
+        }
         <script src="${scriptUri}"></script>
         <div id="controls">
           <vscode-radio id="fit-radio" value="fit">Fit</vscode-radio>

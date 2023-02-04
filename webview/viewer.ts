@@ -1,7 +1,18 @@
 import "./viewer.css";
-import { provideVSCodeDesignSystem, vsCodeButton, vsCodeCheckbox, vsCodeRadio, vsCodeRadioGroup } from "@vscode/webview-ui-toolkit";
+import {
+  provideVSCodeDesignSystem,
+  vsCodeButton,
+  vsCodeCheckbox,
+  vsCodeRadio,
+  vsCodeRadioGroup,
+} from "@vscode/webview-ui-toolkit";
 
-provideVSCodeDesignSystem().register(vsCodeButton(), vsCodeCheckbox(), vsCodeRadio(), vsCodeRadioGroup());
+provideVSCodeDesignSystem().register(
+  vsCodeButton(),
+  vsCodeCheckbox(),
+  vsCodeRadio(),
+  vsCodeRadioGroup()
+);
 
 // @ts-expect-error
 const vscode = acquireVsCodeApi();
@@ -12,13 +23,15 @@ const features = {
   reportTransform: false,
 };
 
-window.addEventListener('load', () => {
-  console.log(document.getElementById('fit-radio'));
+window.addEventListener("load", () => {
+  console.log(document.getElementById("fit-radio"));
   console.log(document.getElementsByName("fit-radio-group"));
 
-  const radioGroup = document.getElementsByName('radio-group');
+  const radioGroup = document.getElementsByName("radio-group");
 
-  radioGroup.item(0).addEventListener('click', (e) => console.log(e.target.value))
+  radioGroup
+    .item(0)
+    .addEventListener("click", (e) => console.log(e.target.value));
 
   // document.getElementById('fit-radio')?.addEventListener('click', (e) => console.log('click', e));
   // document.getElementById('original-radio')?.addEventListener('click', (e) => console.log('click', e));
@@ -65,7 +78,12 @@ function showImage() {
   let scale = 1;
 
   scaleIndicator.innerText = `Scale: ${scale.toFixed(4)}`;
-  const setTransform = (x: number, y: number, newScale: number, { silent = false } = {}) => {
+  const setTransform = (
+    x: number,
+    y: number,
+    newScale: number,
+    { silent = false } = {}
+  ) => {
     const onScreenWidth = image.clientWidth * newScale;
     const onScreenHeight = image.clientHeight * newScale;
 
