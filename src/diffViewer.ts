@@ -33,7 +33,7 @@ async function getHtml({ panel, document, diffTarget, context }: GetHtmlArgs) {
       if (aPng.width === bPng.width && aPng.height === bPng.height) {
         const diff = new PNG({ width: aPng.width, height: bPng.height });
         pixelMatch(aPng.data, bPng.data, diff.data, aPng.width, aPng.height, {
-          alpha: 0,
+          alpha: 0.1,
         });
         const diffBuff = PNG.sync.write(diff);
         diffUri = `data:image/png;base64, ${diffBuff.toString("base64")}`;
@@ -63,7 +63,7 @@ async function getHtml({ panel, document, diffTarget, context }: GetHtmlArgs) {
           http-equiv="Content-Security-Policy"
           content="default-src 'none'; img-src * ${
             webview.cspSource
-          } blob: data:; style-src ${webview.cspSource}; script-src ${
+          } blob: data:; style-src 'unsafe-inline' ${webview.cspSource}; script-src ${
     webview.cspSource
   }; font-src ${webview.cspSource};"
         >
@@ -80,15 +80,18 @@ async function getHtml({ panel, document, diffTarget, context }: GetHtmlArgs) {
           diffUri
             ? `
         <p>${diffUri}</p>
-          <img src="${diffUri}"/>
+          <img id="diff-image" src="${diffUri}"/>
         `
             : ""
         }
         <script src="${scriptUri}"></script>
         <div id="controls">
-          <vscode-radio id="fit-radio" value="fit">Fit</vscode-radio>
-          <vscode-radio id="original-radio" value="original" checked>Original</vscode-radio>
-          <vscode-checkbox id="sync-checkbox">Sync views</vscode-checkbox>
+          <vscode-radio-group direction="vertical">
+            <vscode-radio id="fit-radio" value="fit">Fit</vscode-radio>
+            <vscode-radio id="original-radio" value="original" checked>Original</vscode-radio>
+          </vscode-radio-group>
+          <vscode-checkbox id="sync-checkbox" checked>Sync</vscode-checkbox>
+          <vscode-checkbox id="diff-checkbox">Diff</vscode-checkbox>
         </div>
       </body>
     </html>

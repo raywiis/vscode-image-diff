@@ -14,6 +14,12 @@ provideVSCodeDesignSystem().register(
   vsCodeRadioGroup()
 );
 
+function assert(condition: any, errorMessage?: string): asserts condition {
+  if (!condition) {
+    throw new Error(errorMessage || 'Assertion error');
+  }
+};
+
 // @ts-expect-error
 const vscode = acquireVsCodeApi();
 
@@ -22,20 +28,6 @@ document.body.style.overflow = "hidden";
 const features = {
   reportTransform: false,
 };
-
-window.addEventListener("load", () => {
-  console.log(document.getElementById("fit-radio"));
-  console.log(document.getElementsByName("fit-radio-group"));
-
-  const radioGroup = document.getElementsByName("radio-group");
-
-  radioGroup
-    .item(0)
-    .addEventListener("click", (e) => console.log(e.target.value));
-
-  // document.getElementById('fit-radio')?.addEventListener('click', (e) => console.log('click', e));
-  // document.getElementById('original-radio')?.addEventListener('click', (e) => console.log('click', e));
-});
 
 function showImage() {
   // TODO: Use the shared types...
@@ -49,33 +41,105 @@ function showImage() {
 
   document.body.append(scaleIndicator);
 
-  const image = document.getElementById("main-image");
-  if (!(image instanceof HTMLImageElement)) {
-    throw new Error("Element with id 'main-image' isn't an image element");
-  }
+  const mainImage = document.getElementById("main-image");
+  const diffImage = document.getElementById('diff-image');
 
-  document.body.appendChild(image);
-  image.style.cursor = "grab";
-  image.style.position = "absolute";
-  image.style.top = "0";
-  image.style.left = "0";
-  image.style.transformOrigin = "top left";
+  assert(mainImage && mainImage instanceof HTMLImageElement);
 
-  image.addEventListener("load", () => {
-    const width = `${image.naturalWidth}px`;
-    const height = `${image.naturalHeight}px`;
-    image.style.width = width;
-    image.style.height = height;
+  let shownImage = mainImage;
+
+  document.body.appendChild(shownImage);
+  shownImage.style.cursor = "grab";
+
+  shownImage.addEventListener("load", () => {
+    const width = `${shownImage.naturalWidth}px`;
+    const height = `${shownImage.naturalHeight}px`;
+    shownImage.style.width = width;
+    shownImage.style.height = height;
   });
 
   let drag = false;
   let initialX = 0;
   let initialY = 0;
+  let scale = 1;
+
+  let sync = true;
 
   let dragStartX = 0;
   let dragStartY = 0;
 
-  let scale = 1;
+  const radioGroup = document.querySelector("vscode-radio-group");
+  if (!radioGroup) {
+    throw new Error('No fit selection radio group');
+  }
+  radioGroup.addEventListener("click", (event) => {
+    if (!(event.target && 'value' in event.target)) {
+      throw new Error('Can\'t set fit');
+    }
+    const fitValue = event.target.value;
+    console.log({ fitValue });
+    // TODO: Adjust fit with scale
+    if (fitValue === 'fit') {
+      setTransform(initialX, initialY, scale);
+    } else if (fitValue === 'original') {
+      setTransform(initialX, initialY, scale);
+    }
+  });
+
+  const handleWheelEventOnImage = (event: WheelEvent) => {
+    const delta = event.deltaY * 0.01;
+    const nextScale = scale - delta;
+
+    if (Math.max(nextScale, MIN_SCALE) === MIN_SCALE) {
+      return;
+    }
+
+    const s = nextScale / scale;
+    const cx = event.clientX;
+    const cy = event.clientY;
+    const lx = -initialX;
+    const ly = -initialY;
+
+    const nextX = -((cx + lx) * s - cx);
+    const nextY = -((cy + ly) * s - cy);
+
+    setTransform(nextX, nextY, nextScale);
+  };
+
+
+  if (diffImage) {
+    assert(diffImage instanceof HTMLImageElement);
+
+    diffImage.addEventListener('wheel', handleWheelEventOnImage);
+
+    const syncCheckbox = document.getElementById('sync-checkbox');
+    const diffCheckbox = document.getElementById('diff-checkbox');
+
+    assert(syncCheckbox && diffCheckbox);
+    assert('checked' in syncCheckbox && typeof syncCheckbox.checked === 'boolean');
+    syncCheckbox.checked = true;
+    sync = true;
+    syncCheckbox.addEventListener('click', (event) => {
+      assert(event.target && 'checked'in event.target && typeof event.target.checked === 'boolean');
+      sync = event.target.checked;
+    });
+    diffCheckbox.addEventListener('click', (event) => {
+      assert(event.target && 'checked'in event.target && typeof event.target.checked === 'boolean');
+      const showDiff = event.target.checked;
+      if (showDiff) {
+        shownImage = diffImage;
+        diffImage.style.display = 'block';
+        mainImage.style.display = 'none';
+      } else {
+        shownImage= mainImage;
+        mainImage.style.display = 'block';
+        diffImage.style.display = 'none';
+      }
+      setTransform(initialX, initialY, scale);
+    });
+    syncCheckbox.style.display = 'inline-flex';
+    diffCheckbox.style.display = 'inline-flex';
+  }
 
   scaleIndicator.innerText = `Scale: ${scale.toFixed(4)}`;
   const setTransform = (
@@ -84,8 +148,8 @@ function showImage() {
     newScale: number,
     { silent = false } = {}
   ) => {
-    const onScreenWidth = image.clientWidth * newScale;
-    const onScreenHeight = image.clientHeight * newScale;
+    const onScreenWidth = shownImage.clientWidth * newScale;
+    const onScreenHeight = shownImage.clientHeight * newScale;
 
     const minX = Math.min(0, window.innerWidth - onScreenWidth);
     const maxX = Math.max(0, window.innerWidth - onScreenWidth);
@@ -98,8 +162,8 @@ function showImage() {
     scale = newScale;
     scaleIndicator.innerText = `Scale: ${scale.toFixed(4)}`;
 
-    image.style.transform = `matrix(${scale}, 0, 0, ${scale}, ${initialX}, ${initialY})`;
-    if (features.reportTransform && !silent) {
+    shownImage.style.transform = `matrix(${scale}, 0, 0, ${scale}, ${initialX}, ${initialY})`;
+    if (features.reportTransform && !silent && sync) {
       vscode.postMessage({
         type: "transform",
         data: { x: initialX, y: initialY, scale },
@@ -121,14 +185,14 @@ function showImage() {
 
   const startDrag = (x: number, y: number) => {
     drag = true;
-    image.style.cursor = "grabbing";
+    shownImage.style.cursor = "grabbing";
     dragStartX = x;
     dragStartY = y;
   };
 
   const stopDrag = (x: number, y: number) => {
     drag = false;
-    image.style.cursor = "grab";
+    shownImage.style.cursor = "grab";
     updateDrag(x, y);
   };
 
@@ -160,25 +224,7 @@ function showImage() {
 
   const MIN_SCALE = 0.4;
 
-  image.addEventListener("wheel", (event) => {
-    const delta = event.deltaY * 0.01;
-    const nextScale = scale - delta;
-
-    if (Math.max(nextScale, MIN_SCALE) === MIN_SCALE) {
-      return;
-    }
-
-    const s = nextScale / scale;
-    const cx = event.clientX;
-    const cy = event.clientY;
-    const lx = -initialX;
-    const ly = -initialY;
-
-    const nextX = -((cx + lx) * s - cx);
-    const nextY = -((cy + ly) * s - cy);
-
-    setTransform(nextX, nextY, nextScale);
-  });
+  mainImage.addEventListener("wheel", handleWheelEventOnImage);
 
   return { setTransform };
 }
