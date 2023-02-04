@@ -5,7 +5,11 @@
   "tasks": [
     {
       "label": "Builds",
-      "dependsOn": ["build_extension", "build_webview"],
+      "dependsOn": [
+        "build_extension",
+        "build_webview",
+        "typecheck_extension",
+      ],
       "problemMatcher": [],
       "group": {
         "kind": "build",
@@ -29,10 +33,24 @@
       "label": "build_webview",
       "type": "npm",
       "script": "pack:webview:watch",
-      "problemMatcher": ["$esbuild-watch"],
+      "problemMatcher": [
+        "$esbuild-watch"
+      ],
       "isBackground": true,
       "group": {
         "kind": "build",
+      }
+    },
+    {
+      "label": "typecheck_extension",
+      "type": "npm",
+      "script": "check:types:webview:watch",
+      "problemMatcher": [
+        "$tsc-watch"
+      ],
+      "isBackground": true,
+      "group": {
+        "kind": "test",
       }
     }
   ]

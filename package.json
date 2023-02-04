@@ -43,7 +43,9 @@
     "test": "node ./out/test/runTest.js",
     "fmt": "prettier --write src",
     "pack:webview": "node ./esbuild.mjs",
-    "pack:webview:watch": "node ./esbuild.watch.mjs"
+    "pack:webview:watch": "node ./esbuild.watch.mjs",
+    "check:types:webview": "tsc -p ./webview/tsconfig.json",
+    "check:types:webview:watch": "tsc --watch -p ./webview/tsconfig.json"
   },
   "devDependencies": {
     "@types/glob": "^8.0.0",
