@@ -53,7 +53,7 @@ async function getHtml({ panel, document, diffTarget, context }: GetHtmlArgs) {
   );
   const styleWebviewUri = panel.webview.asWebviewUri(styleUri);
   const documentWebviewUri = panel.webview.asWebviewUri(document.uri);
-  return `
+  return /* html */`
     <!DOCTYPE html>
     <html lang="en">
       <head>
