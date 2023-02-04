@@ -6,6 +6,7 @@ const buildOptions = {
   bundle: true,
   outfile: './out/webview/viewer.js',
   logLevel: 'info',
+  sourcemap: 'inline',
 };
 
 export default buildOptions;

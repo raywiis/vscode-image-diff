@@ -12,6 +12,18 @@ const features = {
   reportTransform: false,
 };
 
+window.addEventListener('load', () => {
+  console.log(document.getElementById('fit-radio'));
+  console.log(document.getElementsByName("fit-radio-group"));
+
+  const radioGroup = document.getElementsByName('radio-group');
+
+  radioGroup.item(0).addEventListener('click', (e) => console.log(e.target.value))
+
+  // document.getElementById('fit-radio')?.addEventListener('click', (e) => console.log('click', e));
+  // document.getElementById('original-radio')?.addEventListener('click', (e) => console.log('click', e));
+});
+
 function showImage() {
   // TODO: Use the shared types...
 

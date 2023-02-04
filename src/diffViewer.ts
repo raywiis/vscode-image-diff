@@ -83,10 +83,8 @@ async function getHtml({ panel, document, diffTarget, context }: GetHtmlArgs) {
     }
         <script src="${scriptUri}"></script>
         <div id="controls">
-          <vscode-radio-group direction="vertical">
-            <vscode-radio>Fit</vscode-radio>
-            <vscode-radio>Natural</vscode-radio>
-          </vscode-radio-group>
+          <vscode-radio id="fit-radio" value="fit">Fit</vscode-radio>
+          <vscode-radio id="original-radio" value="original" checked>Original</vscode-radio>
           <vscode-checkbox id="sync-checkbox">Sync views</vscode-checkbox>
         </div>
       </body>
