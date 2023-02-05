@@ -46,6 +46,8 @@ function showImage() {
 
   assert(mainImage && mainImage instanceof HTMLImageElement);
 
+  let MIN_SCALE = window.innerWidth / mainImage.naturalWidth;
+
   let shownImage = mainImage;
 
   document.body.appendChild(shownImage);
@@ -61,7 +63,7 @@ function showImage() {
   let drag = false;
   let initialX = 0;
   let initialY = 0;
-  let scale = 1;
+  let scale = MIN_SCALE;
 
   let sync = true;
 
@@ -77,22 +79,21 @@ function showImage() {
       throw new Error('Can\'t set fit');
     }
     const fitValue = event.target.value;
-    console.log({ fitValue });
-    // TODO: Adjust fit with scale
     if (fitValue === 'fit') {
+      MIN_SCALE = window.innerWidth / mainImage.naturalWidth;
+      if (scale === 1) {
+        scale = MIN_SCALE;
+      }
       setTransform(initialX, initialY, scale);
     } else if (fitValue === 'original') {
+      MIN_SCALE = 1;
       setTransform(initialX, initialY, scale);
     }
   });
 
   const handleWheelEventOnImage = (event: WheelEvent) => {
     const delta = event.deltaY * 0.01;
-    const nextScale = scale - delta;
-
-    if (Math.max(nextScale, MIN_SCALE) === MIN_SCALE) {
-      return;
-    }
+    const nextScale = Math.max(scale - delta, MIN_SCALE);
 
     const s = nextScale / scale;
     const cx = event.clientX;
@@ -148,6 +149,7 @@ function showImage() {
     newScale: number,
     { silent = false } = {}
   ) => {
+    newScale = Math.max(MIN_SCALE, newScale);
     const onScreenWidth = shownImage.clientWidth * newScale;
     const onScreenHeight = shownImage.clientHeight * newScale;
 
@@ -170,6 +172,7 @@ function showImage() {
       });
     }
   };
+
 
   const clamp = (min: number, max: number, target: number) => {
     return Math.min(Math.max(min, target), max);
@@ -222,9 +225,9 @@ function showImage() {
     stopDrag(event.clientX, event.clientY);
   });
 
-  const MIN_SCALE = 0.4;
 
   mainImage.addEventListener("wheel", handleWheelEventOnImage);
+  setTransform(initialX, initialY, scale, { silent: true });
 
   return { setTransform };
 }
