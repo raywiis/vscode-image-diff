@@ -15,10 +15,19 @@
   ],
   "main": "./out/extension.js",
   "contributes": {
+    "menus": {
+      "editor/title": [
+        {
+          "command": "image-diff.toggle-diff",
+          "group": "navigation",
+          "when": "activeWebviewPanelId == 'image-diff.image-with-diff'"
+        }
+      ]
+    },
     "commands": [
       {
-        "command": "image-diff.helloWorld",
-        "title": "Hello World"
+        "command": "image-diff.toggle-diff",
+        "title": "Toggle diff mask"
       }
     ],
     "customEditors": [

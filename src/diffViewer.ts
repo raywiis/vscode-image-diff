@@ -107,7 +107,7 @@ export class ImageDiffViewer
         supportsMultipleEditorsPerDocument: false,
       }
     );
-    return registration;
+    return { registration, provider };
   }
 
   openFileDocMap = new Map<string, PngDocumentDiffView>();

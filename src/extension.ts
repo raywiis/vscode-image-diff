@@ -9,7 +9,15 @@ export function activate(context: vscode.ExtensionContext) {
   // The command has been defined in the package.json file
   // Now provide the implementation of the command with registerCommand
   // The commandId parameter must match the command field in package.json
-  context.subscriptions.push(ImageDiffViewer.register(context));
+  const {
+    registration: imageDiffViewerRegistration,
+    provider: imageDiffViewerProvider
+  } = ImageDiffViewer.register(context);
+  context.subscriptions.push(imageDiffViewerRegistration);
+        
+  context.subscriptions.push(vscode.commands.registerCommand("image-diff.toggle-diff", (...args) => {
+    console.log({args});
+  }));
 }
 
 // This method is called when your extension is deactivated
