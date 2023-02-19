@@ -70,27 +70,6 @@ function showImage() {
   let dragStartX = 0;
   let dragStartY = 0;
 
-  const radioGroup = document.querySelector("vscode-radio-group");
-  if (!radioGroup) {
-    throw new Error('No fit selection radio group');
-  }
-  radioGroup.addEventListener("click", (event) => {
-    if (!(event.target && 'value' in event.target)) {
-      throw new Error('Can\'t set fit');
-    }
-    const fitValue = event.target.value;
-    if (fitValue === 'fit') {
-      MIN_SCALE = window.innerWidth / mainImage.naturalWidth;
-      if (scale === 1) {
-        scale = MIN_SCALE;
-      }
-      setTransform(initialX, initialY, scale);
-    } else if (fitValue === 'original') {
-      MIN_SCALE = 1;
-      setTransform(initialX, initialY, scale);
-    }
-  });
-
   const handleWheelEventOnImage = (event: WheelEvent) => {
     const delta = event.deltaY * 0.01;
     const nextScale = Math.max(scale - delta, MIN_SCALE);
