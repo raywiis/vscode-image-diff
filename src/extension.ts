@@ -16,6 +16,8 @@ export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(imageDiffViewerRegistration);
         
   context.subscriptions.push(vscode.commands.registerCommand("image-diff.toggle-diff", (...args) => {
+    // args[0] - current file path
+    // args[1] - some sort of options
     console.log({args});
   }));
 }
