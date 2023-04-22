@@ -2,10 +2,14 @@
   "name": "png-image-diff",
   "displayName": "png-image-diff",
   "description": "Quickly view differences in images when diffing",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "publisher": "raywiis",
   "engines": {
     "vscode": "^1.74.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/raywiis/vscode-image-diff"
   },
   "categories": [
     "Other"
