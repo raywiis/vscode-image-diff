@@ -21,6 +21,9 @@ No settings so far
 
 ## Release Notes
 
+### 0.0.3
+
+Added repository url. Made repository public on github
 
 ### 0.0.2
 
