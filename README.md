@@ -19,6 +19,10 @@ This extension is in very early days. And it's subject to change anytime.
 ## Release Notes
 
 
+### 0.0.2
+
+Adjust minimum scale to fit vertical images
+
 ### 0.0.1
 
 Initial release for testing

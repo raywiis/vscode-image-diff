@@ -46,7 +46,9 @@ function showImage() {
 
   assert(mainImage && mainImage instanceof HTMLImageElement);
 
-  let MIN_SCALE = window.innerWidth / mainImage.naturalWidth;
+  const minWidthScale = window.innerWidth / mainImage.naturalWidth;
+  const minHeightScale = window.innerHeight / mainImage.naturalHeight;
+  const MIN_SCALE = Math.min(minWidthScale, minHeightScale);
 
   let shownImage = mainImage;
 
