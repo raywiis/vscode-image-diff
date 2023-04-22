@@ -21,6 +21,10 @@ No settings so far
 
 ## Release Notes
 
+### 0.0.4
+
+Add marketplace icon
+
 ### 0.0.3
 
 Added repository url. Made repository public on github
