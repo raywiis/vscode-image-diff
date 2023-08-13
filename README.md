@@ -8,6 +8,15 @@ Replaces the built in image viewer for png images. New viewer features a diff vi
 - Highlight diff
 - Synchronized panning in diff view
 
+## Commands
+
+- **Toggle diff mask** - Should toggle the diff mask in the active diff view.
+
+  Note that the extension API doesn't allow to directly get the active webview
+  so detection is based on visibility state changes. Therefore it might be
+  sketchy.
+
+
 ## Extension Settings
 
 No settings so far
@@ -16,7 +25,8 @@ No settings so far
 
 > This extension is in very early days. And it's subject to change anytime.
 
-- When viewing diffs of images that take longer to load sometimes the source panel fails to correctly initialize and becomes inactive.
+- When viewing diffs of images that take longer to load sometimes the source
+  panel fails to correctly initialize and becomes inactive.
 
 
 ## Release Notes

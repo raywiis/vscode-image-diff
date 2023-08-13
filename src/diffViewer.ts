@@ -1,10 +1,11 @@
 import * as vscode from "vscode";
 import * as pixelMatch from "pixelmatch";
 import { PNG } from "pngjs";
-import { WebviewToHostMessages } from "../webview/shared";
+import { HostToWebviewMessages, WebviewToHostMessages } from "../webview/shared";
 import { dirname } from "node:path";
 import { getRelPath } from "./getRelPath";
 import { GITHUB_PR_EXTENSION_STRING } from "./constants";
+import { isGithubPRExtensionUri } from "./isGithubPRExtensionUri";
 
 type GetHtmlArgs = {
   panel: vscode.WebviewPanel;
@@ -118,6 +119,8 @@ export class ImageDiffViewer
   openFileRelativeDocMap = new Map<string, PngDocumentDiffView>();
   openFileRelativeWebviewPanelMap = new Map<string, vscode.WebviewPanel>();
 
+  lastActiveDiffPanel: vscode.WebviewPanel | undefined;
+
   constructor(private context: vscode.ExtensionContext) {
     context.extensionUri;
   }
@@ -130,6 +133,12 @@ export class ImageDiffViewer
     return new PngDocumentDiffView(uri, openContext.untitledDocumentData);
   }
 
+  toggleActivePanelDiff()  {
+    if (this.lastActiveDiffPanel) {
+      this.lastActiveDiffPanel.webview.postMessage({ type: 'toggle_diff' } as HostToWebviewMessages);
+    }
+  }
+
   private registerOpenDocument(
     document: PngDocumentDiffView,
     webviewPanel: vscode.WebviewPanel
@@ -138,6 +147,12 @@ export class ImageDiffViewer
     if (!roots) {
       return;
     }
+
+    if (document.uri.scheme === 'git' || isGithubPRExtensionUri(document.uri)) {
+      /** Assuming last resolved panel is the last active one */
+      this.lastActiveDiffPanel = webviewPanel;
+    }
+
     const path = document.uri.path;
     const relPath = getRelPath(document.uri);
     if (document.uri.scheme === "file") {
@@ -205,6 +220,23 @@ export class ImageDiffViewer
       ),
       vscode.Uri.joinPath(this.context.extensionUri, "out", "webview"),
     ];
+
+    webviewPanel.onDidChangeViewState((event) => {
+      if (!event.webviewPanel.active) {
+        return;
+      }
+      if (!(document.uri.scheme === 'git' || isGithubPRExtensionUri(document.uri))) {
+        return;
+      }
+      this.lastActiveDiffPanel = webviewPanel;
+    });
+
+
+    webviewPanel.onDidDispose(() => {
+      if (this.lastActiveDiffPanel === webviewPanel) {
+        this.lastActiveDiffPanel = undefined;
+      }
+    });
 
     webviewPanel.webview.options = {
       enableScripts: true,

@@ -24,7 +24,11 @@ export type WebviewTransformMessage = {
   data: { x: number; y: number; scale: number };
 };
 
-export type HostToWebviewMessages = ShowImageMessage | TransformWebviewMessage;
+export type ToggleDiffMessage = {
+  type: "toggle_diff",
+}
+
+export type HostToWebviewMessages = ShowImageMessage | TransformWebviewMessage | ToggleDiffMessage;
 
 export type WebviewToHostMessages =
   | WebviewReadyMessage

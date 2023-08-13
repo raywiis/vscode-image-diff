@@ -29,6 +29,8 @@ const features = {
   reportTransform: false,
 };
 
+let setDiffView: (show: boolean) => void | undefined;
+
 function showImage() {
   // TODO: Use the shared types...
 
@@ -88,6 +90,22 @@ function showImage() {
     setTransform(nextX, nextY, nextScale);
   };
 
+  setDiffView = (show: boolean) => {
+    if (!diffImage) {
+      return;
+    }
+    assert(diffImage instanceof HTMLImageElement);
+    if (show) {
+      shownImage = diffImage;
+      diffImage.style.display = 'block';
+      mainImage.style.display = 'none';
+    } else {
+      shownImage = mainImage;
+      mainImage.style.display = 'block';
+      diffImage.style.display = 'none';
+    }
+    setTransform(initialX, initialY, scale);
+  };
 
   if (diffImage) {
     assert(diffImage instanceof HTMLImageElement);
@@ -106,18 +124,9 @@ function showImage() {
       sync = event.target.checked;
     });
     diffCheckbox.addEventListener('click', (event) => {
-      assert(event.target && 'checked'in event.target && typeof event.target.checked === 'boolean');
+      assert(event.target && 'checked' in event.target && typeof event.target.checked === 'boolean');
       const showDiff = event.target.checked;
-      if (showDiff) {
-        shownImage = diffImage;
-        diffImage.style.display = 'block';
-        mainImage.style.display = 'none';
-      } else {
-        shownImage= mainImage;
-        mainImage.style.display = 'block';
-        diffImage.style.display = 'none';
-      }
-      setTransform(initialX, initialY, scale);
+      setDiffView(showDiff);
     });
     syncCheckbox.style.display = 'inline-flex';
     diffCheckbox.style.display = 'inline-flex';
@@ -229,6 +238,17 @@ window.addEventListener("message", (message) => {
       message.data.data.scale,
       { silent: true }
     );
+  } else if (message.data.type = 'toggle_diff') {
+    try {
+      const diffCheckbox = document.getElementById('diff-checkbox');
+      if ('checked' in diffCheckbox && typeof diffCheckbox.checked === 'boolean') {
+        const shouldShowDiff = !diffCheckbox.checked;
+        diffCheckbox.checked = shouldShowDiff;
+        setDiffView(shouldShowDiff);
+      }
+    } catch (error) {
+      console.error(error);
+    }
   } else {
     throw new Error("Unsupported message");
   }
