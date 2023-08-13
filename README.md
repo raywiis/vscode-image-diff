@@ -31,6 +31,13 @@ No settings so far
 
 ## Release Notes
 
+### 0.0.5
+
+Attempt to detect diff views when using githubs PR extension.
+
+Implement a command to toggle the active view diff mask
+
+
 ### 0.0.4
 
 Add marketplace icon
