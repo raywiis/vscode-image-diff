@@ -3,6 +3,8 @@ import * as pixelMatch from "pixelmatch";
 import { PNG } from "pngjs";
 import { WebviewToHostMessages } from "../webview/shared";
 import { dirname } from "node:path";
+import { getRelPath } from "./getRelPath";
+import { GITHUB_PR_EXTENSION_STRING } from "./constants";
 
 type GetHtmlArgs = {
   panel: vscode.WebviewPanel;
@@ -113,6 +115,9 @@ export class ImageDiffViewer
   openFileDocMap = new Map<string, PngDocumentDiffView>();
   openFileWebviewPanelMap = new Map<string, vscode.WebviewPanel>();
 
+  openFileRelativeDocMap = new Map<string, PngDocumentDiffView>();
+  openFileRelativeWebviewPanelMap = new Map<string, vscode.WebviewPanel>();
+
   constructor(private context: vscode.ExtensionContext) {
     context.extensionUri;
   }
@@ -134,13 +139,22 @@ export class ImageDiffViewer
       return;
     }
     const path = document.uri.path;
+    const relPath = getRelPath(document.uri);
     if (document.uri.scheme === "file") {
       document.onDispose(() => {
         this.openFileDocMap.delete(path);
         this.openFileWebviewPanelMap.delete(path);
+        if (relPath) {
+          this.openFileRelativeDocMap.delete(relPath);
+          this.openFileRelativeWebviewPanelMap.delete(relPath);
+        }
       });
       this.openFileDocMap.set(path, document);
       this.openFileWebviewPanelMap.set(path, webviewPanel);
+      if (relPath) {
+        this.openFileRelativeDocMap.set(relPath, document);
+        this.openFileRelativeWebviewPanelMap.set(relPath, webviewPanel);
+      }
     }
   }
 
@@ -154,6 +168,13 @@ export class ImageDiffViewer
       return [
         this.openFileDocMap.get(document.uri.path),
         this.openFileWebviewPanelMap.get(document.uri.path),
+      ] as const;
+    }
+    const relPath = getRelPath(document.uri);
+    if (relPath) {
+      return [
+        this.openFileRelativeDocMap.get(relPath),
+        this.openFileRelativeWebviewPanelMap.get(relPath),
       ] as const;
     }
     return [undefined, undefined] as const;
