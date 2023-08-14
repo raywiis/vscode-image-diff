@@ -35,6 +35,13 @@
         "title": "Toggle diff mask"
       }
     ],
+    "keybindings": [
+      {
+        "command": "image-diff.toggle-diff",
+        "key": "shift+d",
+        "when": "activeWebviewPanelId == 'image-diff.image-with-diff'"
+      }
+    ],
     "customEditors": [
       {
         "viewType": "image-diff.image-with-diff",
