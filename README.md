@@ -31,6 +31,10 @@ No settings so far
 
 ## Release Notes
 
+### 0.0.6
+
+Add default keybinding for toggle diff mask
+
 ### 0.0.5
 
 Attempt to detect diff views when using githubs PR extension.
