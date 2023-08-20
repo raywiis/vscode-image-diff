@@ -1,5 +1,6 @@
 import "./viewer.css";
 import {
+  Checkbox,
   provideVSCodeDesignSystem,
   vsCodeButton,
   vsCodeCheckbox,
@@ -116,15 +117,15 @@ function showImage() {
     const diffCheckbox = document.getElementById('diff-checkbox');
 
     assert(syncCheckbox && diffCheckbox);
-    assert('checked' in syncCheckbox && typeof syncCheckbox.checked === 'boolean');
+    assert(syncCheckbox instanceof Checkbox);
     syncCheckbox.checked = true;
     sync = true;
     syncCheckbox.addEventListener('click', (event) => {
-      assert(event.target && 'checked'in event.target && typeof event.target.checked === 'boolean');
+      assert(event.target instanceof Checkbox);
       sync = event.target.checked;
     });
     diffCheckbox.addEventListener('click', (event) => {
-      assert(event.target && 'checked' in event.target && typeof event.target.checked === 'boolean');
+      assert(event.target instanceof Checkbox);
       const showDiff = event.target.checked;
       setDiffView(showDiff);
     });
@@ -241,7 +242,7 @@ window.addEventListener("message", (message) => {
   } else if (message.data.type = 'toggle_diff') {
     try {
       const diffCheckbox = document.getElementById('diff-checkbox');
-      if ('checked' in diffCheckbox && typeof diffCheckbox.checked === 'boolean') {
+      if (diffCheckbox instanceof Checkbox) {
         const shouldShowDiff = !diffCheckbox.checked;
         diffCheckbox.checked = shouldShowDiff;
         setDiffView(shouldShowDiff);
