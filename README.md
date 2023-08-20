@@ -31,6 +31,10 @@ No settings so far
 
 ## Release Notes
 
+### 0.0.8
+
+Reduce the diff threshold to 0
+
 ### 0.0.7
 
 Add a count of how many pixels are different when comparing images

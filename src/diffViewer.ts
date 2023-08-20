@@ -37,6 +37,7 @@ async function getHtml({ panel, document, diffTarget, context }: GetHtmlArgs) {
       if (aPng.width === bPng.width && aPng.height === bPng.height) {
         const diff = new PNG({ width: aPng.width, height: bPng.height });
         diffPixelCount = pixelMatch(aPng.data, bPng.data, diff.data, aPng.width, aPng.height, {
+          threshold: 0,
           alpha: 0.1,
         });
         const diffBuff = PNG.sync.write(diff);
