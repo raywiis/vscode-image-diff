@@ -35,14 +35,7 @@ let setDiffView: (show: boolean) => void | undefined;
 function showImage() {
   // TODO: Use the shared types...
 
-  const scaleIndicator = document.createElement("div");
-  scaleIndicator.style.position = "absolute";
-  scaleIndicator.style.right = "0";
-  scaleIndicator.style.bottom = "0";
-  scaleIndicator.style.zIndex = "10";
-  scaleIndicator.style.mixBlendMode = "difference";
-
-  document.body.append(scaleIndicator);
+  const scaleIndicator = document.getElementById("scale-indicator");
 
   const mainImage = document.getElementById("main-image");
   const diffImage = document.getElementById('diff-image');

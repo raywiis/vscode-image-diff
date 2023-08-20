@@ -15,9 +15,7 @@ export function activate(context: vscode.ExtensionContext) {
   } = ImageDiffViewer.register(context);
   context.subscriptions.push(imageDiffViewerRegistration);
         
-  context.subscriptions.push(vscode.commands.registerCommand("image-diff.toggle-diff", (...args) => {
-    const activeTab = vscode.window.tabGroups.activeTabGroup.activeTab;
-    const activeInput = activeTab?.input;
+  context.subscriptions.push(vscode.commands.registerCommand("image-diff.toggle-diff", () => {
     imageDiffViewerProvider.toggleActivePanelDiff();
   }));
 }

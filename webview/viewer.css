@@ -13,9 +13,24 @@
   z-index: 10;
   cursor: pointer;
   position: absolute;
+  left: 0;
   bottom: 4px;
-  left: 4px;
-  width: 50%;
+  padding: 0 4px;
+  width: 100%;
+  box-sizing: border-box;
+  display: flex;
+  place-items: center left;
+}
+
+#control-spacer {
+  flex: 2;
+}
+
+#scale-indicator {
+  text-align: right;
+  flex-grow: 0;
+  flex-basis: 200px;
+  mix-blend-mode: difference;
 }
 
 #sync-checkbox,

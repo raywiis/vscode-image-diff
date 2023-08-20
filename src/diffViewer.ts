@@ -26,6 +26,7 @@ async function getHtml({ panel, document, diffTarget, context }: GetHtmlArgs) {
     )
   );
   let diffUri: string | undefined = undefined;
+  let diffPixelCount: number | undefined = undefined;
   if (diffTarget) {
     try {
       const a = await vscode.workspace.fs.readFile(diffTarget.uri);
@@ -35,7 +36,7 @@ async function getHtml({ panel, document, diffTarget, context }: GetHtmlArgs) {
 
       if (aPng.width === bPng.width && aPng.height === bPng.height) {
         const diff = new PNG({ width: aPng.width, height: bPng.height });
-        pixelMatch(aPng.data, bPng.data, diff.data, aPng.width, aPng.height, {
+        diffPixelCount = pixelMatch(aPng.data, bPng.data, diff.data, aPng.width, aPng.height, {
           alpha: 0.1,
         });
         const diffBuff = PNG.sync.write(diff);
@@ -91,6 +92,13 @@ async function getHtml({ panel, document, diffTarget, context }: GetHtmlArgs) {
         <div id="controls">
           <vscode-checkbox id="sync-checkbox" checked>Sync</vscode-checkbox>
           <vscode-checkbox id="diff-checkbox">Diff</vscode-checkbox>
+          ${diffPixelCount === undefined
+      ? ''
+      : /*html*/`
+              <span>${diffPixelCount} different pixels</span>
+            `}
+            <span id="control-spacer"></span>
+            <span id="scale-indicator"></span>
         </div>
       </body>
     </html>
