@@ -31,6 +31,10 @@ No settings so far
 
 ## Release Notes
 
+### 0.0.7
+
+Add a count of how many pixels are different when comparing images
+
 ### 0.0.6
 
 Add default keybinding for toggle diff mask
