@@ -25,15 +25,13 @@ No settings so far
 
 > This extension is in very early days. And it's subject to change anytime.
 
-- When viewing diffs of images that take longer to load sometimes the source
-  panel fails to correctly initialize and becomes inactive.
-
-
 ## Release Notes
 
 ### upcoming
 
 Remove URI strings behind images in viewer
+
+Fix sync sometimes working only one way in diff view
 
 ### 0.0.8
 

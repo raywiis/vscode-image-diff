@@ -11,21 +11,24 @@ export class ImageLinker {
   addDocumentAndPanel(document: PngDocumentDiffView, webviewPanel: WebviewPanel) {
     const path = document.uri.path;
     const relPath = getRelPath(document.uri);
-    if (document.uri.scheme === "file") {
-      document.onDispose(() => {
-        this.openPathToDocumentMap.delete(path);
-        this.openPathToWebviewPanelMap.delete(path);
-        if (relPath) {
-          this.openRelativePathToDocumentMap.delete(relPath);
-          this.openRelativePathToWebviewPanelMap.delete(relPath);
-        }
-      });
-      this.openPathToDocumentMap.set(path, document);
-      this.openPathToWebviewPanelMap.set(path, webviewPanel);
+
+    if (document.uri.scheme !=='file') {
+      return;
+    }
+
+    document.onDispose(() => {
+      this.openPathToDocumentMap.delete(path);
+      this.openPathToWebviewPanelMap.delete(path);
       if (relPath) {
-        this.openRelativePathToDocumentMap.set(relPath, document);
-        this.openRelativePathToWebviewPanelMap.set(relPath, webviewPanel);
+        this.openRelativePathToDocumentMap.delete(relPath);
+        this.openRelativePathToWebviewPanelMap.delete(relPath);
       }
+    });
+    this.openPathToDocumentMap.set(path, document);
+    this.openPathToWebviewPanelMap.set(path, webviewPanel);
+    if (relPath) {
+      this.openRelativePathToDocumentMap.set(relPath, document);
+      this.openRelativePathToWebviewPanelMap.set(relPath, webviewPanel);
     }
   }
 
@@ -35,6 +38,9 @@ export class ImageLinker {
         r();
       }, 10)
     );
+    if (document.uri.scheme === 'file') {
+      return [undefined, undefined] as const;
+    }
     if (document.uri.scheme === "git") {
       return [
         this.openPathToDocumentMap.get(document.uri.path),
