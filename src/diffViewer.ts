@@ -4,7 +4,6 @@ import { PNG } from "pngjs";
 import { HostToWebviewMessages, WebviewToHostMessages } from "../webview/shared";
 import { dirname } from "node:path";
 import { getRelPath } from "./getRelPath";
-import { GITHUB_PR_EXTENSION_STRING } from "./constants";
 import { isGithubPRExtensionUri } from "./isGithubPRExtensionUri";
 
 type GetHtmlArgs = {
@@ -66,11 +65,9 @@ async function getHtml({ panel, document, diffTarget, context }: GetHtmlArgs) {
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <meta
           http-equiv="Content-Security-Policy"
-          content="default-src 'none'; img-src * ${
-            webview.cspSource
-          } blob: data:; style-src 'unsafe-inline' ${webview.cspSource}; script-src ${
-    webview.cspSource
-  }; font-src ${webview.cspSource};"
+          content="default-src 'none'; img-src * ${webview.cspSource
+    } blob: data:; style-src 'unsafe-inline' ${webview.cspSource}; script-src ${webview.cspSource
+    }; font-src ${webview.cspSource};"
         >
         <title>Image diff</title>
         <link href="${codiconsUri}" rel="stylesheet"/>
@@ -78,17 +75,12 @@ async function getHtml({ panel, document, diffTarget, context }: GetHtmlArgs) {
       </head>
       <body>
         <img id="main-image" src="${documentWebviewUri}" />
-        <p>
-          ${document.uri.toString()} <br/> ${document.uri.path}
-        </p>
-        ${
-          diffUri
-            ? `
-        <p>${diffUri}</p>
+        ${diffUri
+      ? /* html */`
           <img id="diff-image" src="${diffUri}"/>
         `
-            : ""
-        }
+      : ""
+    }
         <script src="${scriptUri}"></script>
         <div id="controls">
           <vscode-checkbox id="sync-checkbox" checked>Sync</vscode-checkbox>
@@ -142,7 +134,7 @@ export class ImageDiffViewer
     return new PngDocumentDiffView(uri, openContext.untitledDocumentData);
   }
 
-  toggleActivePanelDiff()  {
+  toggleActivePanelDiff() {
     if (this.lastActiveDiffPanel) {
       this.lastActiveDiffPanel.webview.postMessage({ type: 'toggle_diff' } as HostToWebviewMessages);
     }

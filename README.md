@@ -31,6 +31,10 @@ No settings so far
 
 ## Release Notes
 
+### upcoming
+
+Remove URI strings behind images in viewer
+
 ### 0.0.8
 
 Reduce the diff threshold to 0
