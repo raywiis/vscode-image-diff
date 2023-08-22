@@ -27,7 +27,7 @@ No settings so far
 
 ## Release Notes
 
-### upcoming
+### 0.0.9
 
 Remove URI strings behind images in viewer
 
