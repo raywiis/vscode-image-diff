@@ -5,6 +5,8 @@ import { HostToWebviewMessages, WebviewToHostMessages } from "../webview/shared"
 import { dirname } from "node:path";
 import { getRelPath } from "./getRelPath";
 import { isGithubPRExtensionUri } from "./isGithubPRExtensionUri";
+import { PngDocumentDiffView } from "./PngDocumentDiffView";
+import { ImageLinker } from "./ImageLinker";
 
 type GetHtmlArgs = {
   panel: vscode.WebviewPanel;
@@ -114,11 +116,7 @@ export class ImageDiffViewer
     return { registration, provider };
   }
 
-  openFileDocMap = new Map<string, PngDocumentDiffView>();
-  openFileWebviewPanelMap = new Map<string, vscode.WebviewPanel>();
-
-  openFileRelativeDocMap = new Map<string, PngDocumentDiffView>();
-  openFileRelativeWebviewPanelMap = new Map<string, vscode.WebviewPanel>();
+  imageLinker = new ImageLinker();
 
   lastActiveDiffPanel: vscode.WebviewPanel | undefined;
 
@@ -154,46 +152,7 @@ export class ImageDiffViewer
       this.lastActiveDiffPanel = webviewPanel;
     }
 
-    const path = document.uri.path;
-    const relPath = getRelPath(document.uri);
-    if (document.uri.scheme === "file") {
-      document.onDispose(() => {
-        this.openFileDocMap.delete(path);
-        this.openFileWebviewPanelMap.delete(path);
-        if (relPath) {
-          this.openFileRelativeDocMap.delete(relPath);
-          this.openFileRelativeWebviewPanelMap.delete(relPath);
-        }
-      });
-      this.openFileDocMap.set(path, document);
-      this.openFileWebviewPanelMap.set(path, webviewPanel);
-      if (relPath) {
-        this.openFileRelativeDocMap.set(relPath, document);
-        this.openFileRelativeWebviewPanelMap.set(relPath, webviewPanel);
-      }
-    }
-  }
-
-  private async getDiffTarget(document: PngDocumentDiffView) {
-    await new Promise<void>((r) =>
-      setTimeout(() => {
-        r();
-      }, 10)
-    );
-    if (document.uri.scheme === "git") {
-      return [
-        this.openFileDocMap.get(document.uri.path),
-        this.openFileWebviewPanelMap.get(document.uri.path),
-      ] as const;
-    }
-    const relPath = getRelPath(document.uri);
-    if (relPath) {
-      return [
-        this.openFileRelativeDocMap.get(relPath),
-        this.openFileRelativeWebviewPanelMap.get(relPath),
-      ] as const;
-    }
-    return [undefined, undefined] as const;
+    this.imageLinker.addDocumentAndPanel(document, webviewPanel);
   }
 
   async resolveCustomEditor(
@@ -202,7 +161,7 @@ export class ImageDiffViewer
     token: vscode.CancellationToken
   ): Promise<void> {
     this.registerOpenDocument(document, webviewPanel);
-    const [diffTarget, diffWebview] = await this.getDiffTarget(document);
+    const [diffTarget, diffWebview] = await this.imageLinker.findLink(document);
 
     const getRootUri = (uri: vscode.Uri) => {
       const dirPath = dirname(uri.path);
@@ -278,31 +237,5 @@ export class ImageDiffViewer
         }
       }
     );
-  }
-}
-
-class PngDocumentDiffView implements vscode.CustomDocument {
-  private disposeEmitter = new vscode.EventEmitter<void>();
-  private newWebviewEmitter = new vscode.EventEmitter<vscode.WebviewPanel>();
-  public onWebviewOpen = this.newWebviewEmitter.event;
-  public onDispose = this.disposeEmitter.event;
-  data: Thenable<Uint8Array>;
-
-  constructor(public uri: vscode.Uri, untitledData: Uint8Array | undefined) {
-    // https://file%2B.vscode-resource.vscode-cdn.net/home/rejus/image-diff/src/collect-payment-spec-js-invoice-actions-should-open-charge-with-credit-card-dialog-for-draft-invoice-snap.png?version%3D1674999497292
-    if (untitledData) {
-      this.data = Promise.resolve(untitledData);
-    }
-    this.data = vscode.workspace.fs.readFile(uri);
-  }
-
-  registerNewWebview(webviewPanel: vscode.WebviewPanel) {
-    this.newWebviewEmitter.fire(webviewPanel);
-  }
-
-  dispose(): void {
-    this.newWebviewEmitter.dispose();
-    this.disposeEmitter.fire();
-    this.disposeEmitter.dispose();
   }
 }

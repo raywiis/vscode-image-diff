@@ -5,7 +5,7 @@ Replaces the built in image viewer for png images. New viewer features a diff vi
 ## Features
 
 - Scroll to zoom into images
-- Highlight diff
+- Highlight differences with mask from [pixelmatch](https://github.com/mapbox/pixelmatch)!
 - Synchronized panning in diff view
 
 ## Commands
