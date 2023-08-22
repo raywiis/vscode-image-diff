@@ -1,6 +1,6 @@
 import { Uri, workspace } from "vscode";
 import { GITHUB_PR_EXTENSION_STRING } from "./constants";
-import { relative, sep,  } from 'node:path';
+import { relative, sep } from 'node:path';
 import { isGithubPRExtensionUri } from "./isGithubPRExtensionUri";
 
 export function getRelPath(uri: Uri): string | undefined {

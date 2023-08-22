@@ -3,7 +3,6 @@ import * as pixelMatch from "pixelmatch";
 import { PNG } from "pngjs";
 import { HostToWebviewMessages, WebviewToHostMessages } from "../webview/shared";
 import { dirname } from "node:path";
-import { getRelPath } from "./getRelPath";
 import { isGithubPRExtensionUri } from "./isGithubPRExtensionUri";
 import { PngDocumentDiffView } from "./PngDocumentDiffView";
 import { ImageLinker } from "./ImageLinker";
