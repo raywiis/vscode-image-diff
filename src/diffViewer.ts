@@ -10,7 +10,7 @@ import { ImageLinker } from "./ImageLinker";
 type GetHtmlArgs = {
   panel: vscode.WebviewPanel;
   document: PngDocumentDiffView;
-  diffTarget?: vscode.CustomDocument;
+  diffTarget?: PngDocumentDiffView;
   context: vscode.ExtensionContext;
 };
 
@@ -29,10 +29,8 @@ async function getHtml({ panel, document, diffTarget, context }: GetHtmlArgs) {
   let diffPixelCount: number | undefined = undefined;
   if (diffTarget) {
     try {
-      const a = await vscode.workspace.fs.readFile(diffTarget.uri);
-      const b = await vscode.workspace.fs.readFile(document.uri);
-      const aPng = PNG.sync.read(Buffer.from(a));
-      const bPng = PNG.sync.read(Buffer.from(b));
+      const aPng = await diffTarget.pngPromise;
+      const bPng = await document.pngPromise;
 
       if (aPng.width === bPng.width && aPng.height === bPng.height) {
         const diff = new PNG({ width: aPng.width, height: bPng.height });
@@ -161,6 +159,8 @@ export class ImageDiffViewer
   ): Promise<void> {
     this.registerOpenDocument(document, webviewPanel);
     const [diffTarget, diffWebview] = await this.imageLinker.findLink(document);
+
+    console.log({ from: document.uri, to: diffTarget?.uri });
 
     const getRootUri = (uri: vscode.Uri) => {
       const dirPath = dirname(uri.path);
