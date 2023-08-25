@@ -6,6 +6,7 @@ import { dirname } from "node:path";
 import { isGithubPRExtensionUri } from "./isGithubPRExtensionUri";
 import { PngDocumentDiffView } from "./PngDocumentDiffView";
 import { ImageLinker } from "./ImageLinker";
+import assert = require("node:assert");
 
 type GetHtmlArgs = {
   panel: vscode.WebviewPanel;
@@ -13,6 +14,61 @@ type GetHtmlArgs = {
   diffTarget?: PngDocumentDiffView;
   context: vscode.ExtensionContext;
 };
+
+function padOutImage(desiredWidth: number, desiredHeight: number, image: PNG) {
+  const actualWidth = image.width;
+  const actualHeight = image.height;
+  assert(actualWidth <= desiredWidth && actualHeight <= desiredHeight);
+
+  const paddedImage = new PNG({ width: desiredWidth, height: desiredHeight });
+
+  const verticalPadding = desiredHeight - actualHeight;
+  const horizontalPadding = desiredWidth - actualWidth;
+
+  const topPadding = Math.floor(verticalPadding / 2);
+  const bottomPadding = Math.ceil(verticalPadding / 2);
+
+  const leftPadding = Math.floor(horizontalPadding / 2);
+  const rightPadding = Math.ceil(horizontalPadding / 2);
+
+  const topPaddingByteCount = topPadding * desiredWidth * 4;
+  paddedImage.data.fill(0x00000000);
+  const bytesPerPixel = 4;
+
+  for (let i = 0; i < actualHeight; i++) {
+    const paddedRowOffset = bytesPerPixel * desiredWidth * i;
+    const imageRowOffset = bytesPerPixel * actualWidth * i;
+
+    for (let j = 0; j < actualWidth; j++) {
+      const paddedOffset = paddedRowOffset + (j * bytesPerPixel);
+      const imageOffset = imageRowOffset + (j * bytesPerPixel);
+      const pixel = image.data.readInt32LE(imageOffset);
+      paddedImage.data.writeInt32LE(pixel, paddedOffset);
+    }
+
+    for (let j = 0; j < horizontalPadding; j++) {
+      paddedImage.data.writeInt32LE(0);
+    }
+  }
+
+  return paddedImage;
+}
+
+function getDiffDataUri(aPng: PNG, bPng: PNG) {
+  assert(aPng.width === bPng.width && aPng.height === bPng.height);
+  const diff = new PNG({ width: aPng.width, height: bPng.height });
+  const diffPixelCount = pixelMatch(aPng.data, bPng.data, diff.data, aPng.width, aPng.height, {
+    threshold: 0,
+    includeAA: true,
+    alpha: 0.1,
+  });
+  const diffBuff = PNG.sync.write(diff);
+  const diffUri = `data:image/png;base64, ${diffBuff.toString("base64")}`;
+  return {
+    diffUri,
+    diffPixelCount
+  } as const;
+}
 
 async function getHtml({ panel, document, diffTarget, context }: GetHtmlArgs) {
   const webview = panel.webview;
@@ -27,19 +83,26 @@ async function getHtml({ panel, document, diffTarget, context }: GetHtmlArgs) {
   );
   let diffUri: string | undefined = undefined;
   let diffPixelCount: number | undefined = undefined;
+  let paddedBase64Image: string | undefined = undefined;
   if (diffTarget) {
     try {
       const aPng = await diffTarget.pngPromise;
       const bPng = await document.pngPromise;
 
+      const mutualWidth = Math.max(aPng.width, bPng.width);
+      const mutualHeight = Math.max(aPng.height, bPng.height);
+
       if (aPng.width === bPng.width && aPng.height === bPng.height) {
-        const diff = new PNG({ width: aPng.width, height: bPng.height });
-        diffPixelCount = pixelMatch(aPng.data, bPng.data, diff.data, aPng.width, aPng.height, {
-          threshold: 0,
-          alpha: 0.1,
-        });
-        const diffBuff = PNG.sync.write(diff);
-        diffUri = `data:image/png;base64, ${diffBuff.toString("base64")}`;
+        const res = getDiffDataUri(aPng, bPng);
+        diffUri = res.diffUri;
+        diffPixelCount = res.diffPixelCount;
+      } else {
+        const paddedA = padOutImage(mutualWidth, mutualHeight, aPng);
+        const paddedB = padOutImage(mutualWidth, mutualHeight, bPng);
+        const res = getDiffDataUri(paddedA, paddedB);
+        diffUri = res.diffUri;
+        diffPixelCount = res.diffPixelCount;
+        paddedBase64Image = `data:image/png;base64, ${PNG.sync.write(paddedB).toString('base64')}`;
       }
     } catch (err) {
       console.error(err);
@@ -73,7 +136,7 @@ async function getHtml({ panel, document, diffTarget, context }: GetHtmlArgs) {
         <link href="${styleWebviewUri}" rel="stylesheet"/>
       </head>
       <body>
-        <img id="main-image" src="${documentWebviewUri}" />
+        <img id="main-image" src="${paddedBase64Image ?? documentWebviewUri}" />
         ${diffUri
       ? /* html */`
           <img id="diff-image" src="${diffUri}"/>
@@ -89,6 +152,7 @@ async function getHtml({ panel, document, diffTarget, context }: GetHtmlArgs) {
       : /*html*/`
               <span>${diffPixelCount} different pixels</span>
             `}
+            <span>${paddedBase64Image ? 'padded' : ''}</span>
             <span id="control-spacer"></span>
             <span id="scale-indicator"></span>
         </div>
