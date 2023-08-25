@@ -4,6 +4,12 @@ All notable changes to the "image-diff" extension will be documented in this fil
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## 0.0.11
+
+Prototype diffing images of different sizes.
+Images are padded out with transparent pixels.
+Synchronized viewing is slightly weird and padding will only be applied right and bottom side.
+
 ## 0.0.10
 
 Extension market listing changes. Nothing functional.
