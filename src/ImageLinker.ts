@@ -2,58 +2,60 @@ import { WebviewPanel } from "vscode";
 import { getRelPath } from "./getRelPath";
 import { PngDocumentDiffView } from "./PngDocumentDiffView";
 
+type LinkPackage = readonly [
+  document: PngDocumentDiffView,
+  webviewPanel: WebviewPanel,
+] | readonly [
+  undefined,
+  undefined,
+];
+
+const emptyLinkPackage: LinkPackage = [undefined, undefined];
+
 export class ImageLinker {
-  private openPathToDocumentMap = new Map<string, PngDocumentDiffView>();
-  private openPathToWebviewPanelMap = new Map<string, WebviewPanel>;
-  private openRelativePathToDocumentMap = new Map<string, PngDocumentDiffView>();
-  private openRelativePathToWebviewPanelMap = new Map<string, WebviewPanel>;
+  private pathLink = new Map<string, LinkPackage>();
+  private relativePathLinkMap = new Map<string, LinkPackage>();
 
   addDocumentAndPanel(document: PngDocumentDiffView, webviewPanel: WebviewPanel) {
     const path = document.uri.path;
     const relPath = getRelPath(document.uri);
 
-    if (document.uri.scheme !=='file') {
+    if (document.uri.scheme !== 'file') {
       return;
     }
 
+    const linkPackage: LinkPackage = [
+      document, webviewPanel
+    ];
+
     document.onDispose(() => {
-      this.openPathToDocumentMap.delete(path);
-      this.openPathToWebviewPanelMap.delete(path);
+      this.pathLink.delete(path);
       if (relPath) {
-        this.openRelativePathToDocumentMap.delete(relPath);
-        this.openRelativePathToWebviewPanelMap.delete(relPath);
+        this.relativePathLinkMap.delete(relPath);
       }
     });
-    this.openPathToDocumentMap.set(path, document);
-    this.openPathToWebviewPanelMap.set(path, webviewPanel);
+    this.pathLink.set(path, linkPackage);
     if (relPath) {
-      this.openRelativePathToDocumentMap.set(relPath, document);
-      this.openRelativePathToWebviewPanelMap.set(relPath, webviewPanel);
+      this.relativePathLinkMap.set(relPath, linkPackage);
     }
   }
 
-  async findLink(document: PngDocumentDiffView) {
+  async findLink(document: PngDocumentDiffView): Promise<LinkPackage> {
     await new Promise<void>((r) =>
       setTimeout(() => {
         r();
       }, 10)
     );
     if (document.uri.scheme === 'file') {
-      return [undefined, undefined] as const;
+      return emptyLinkPackage;
     }
     if (document.uri.scheme === "git") {
-      return [
-        this.openPathToDocumentMap.get(document.uri.path),
-        this.openPathToWebviewPanelMap.get(document.uri.path),
-      ] as const;
+      return this.pathLink.get(document.uri.path) ?? emptyLinkPackage;
     }
     const relPath = getRelPath(document.uri);
     if (relPath) {
-      return [
-        this.openRelativePathToDocumentMap.get(relPath),
-        this.openRelativePathToWebviewPanelMap.get(relPath),
-      ] as const;
+      return this.relativePathLinkMap.get(relPath) ?? emptyLinkPackage;
     }
-    return [undefined, undefined] as const;
+    return emptyLinkPackage;
   }
 }
