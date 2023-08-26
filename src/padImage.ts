@@ -5,6 +5,12 @@ export type VerticalAlign = 'top' | 'middle' | 'bottom';
 
 export type HorizontalAlign = 'left' | 'center' | 'right';
 
+export type AlignmentOption = `${VerticalAlign}-${HorizontalAlign}`;
+
+export const alignmentOptions: AlignmentOption[] = [
+  "top-left", 'top-center', 'top-right', 'middle-left', 'middle-center', 'middle-right', "bottom-left", 'bottom-center', 'bottom-right'
+];
+
 function getTopPadding(verticalAlign: VerticalAlign, actualHeight: number, desiredHeight: number): number {
   return verticalAlign === 'top'
     ? 0

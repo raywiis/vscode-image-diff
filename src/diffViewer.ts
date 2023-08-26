@@ -7,14 +7,7 @@ import { isGithubPRExtensionUri } from "./isGithubPRExtensionUri";
 import { PngDocumentDiffView } from "./PngDocumentDiffView";
 import { ImageLinker } from "./ImageLinker";
 import assert = require("node:assert");
-import { HorizontalAlign, VerticalAlign, padImage } from "./padImage";
-
-type GetHtmlArgs = {
-  panel: vscode.WebviewPanel;
-  document: PngDocumentDiffView;
-  diffTarget?: PngDocumentDiffView;
-  context: vscode.ExtensionContext;
-};
+import { AlignmentOption, HorizontalAlign, VerticalAlign, alignmentOptions, padImage } from "./padImage";
 
 function getDiffDataUri(aPng: PNG, bPng: PNG) {
   assert(aPng.width === bPng.width && aPng.height === bPng.height);
@@ -32,7 +25,15 @@ function getDiffDataUri(aPng: PNG, bPng: PNG) {
   } as const;
 }
 
-async function getHtml({ panel, document, diffTarget, context }: GetHtmlArgs) {
+type GetHtmlArgs = {
+  panel: vscode.WebviewPanel;
+  document: PngDocumentDiffView;
+  diffTarget?: PngDocumentDiffView;
+  context: vscode.ExtensionContext;
+  selectedAlignment: AlignmentOption;
+};
+
+async function getHtml({ panel, document, diffTarget, context, selectedAlignment }: GetHtmlArgs) {
   const webview = panel.webview;
   const codiconsUri = webview.asWebviewUri(
     vscode.Uri.joinPath(
@@ -43,6 +44,8 @@ async function getHtml({ panel, document, diffTarget, context }: GetHtmlArgs) {
       "codicon.css"
     )
   );
+
+  console.log({selectedAlignment})
   let diffUri: string | undefined = undefined;
   let diffPixelCount: number | undefined = undefined;
   let paddedBase64Image: string | undefined = undefined;
@@ -59,14 +62,13 @@ async function getHtml({ panel, document, diffTarget, context }: GetHtmlArgs) {
         diffUri = res.diffUri;
         diffPixelCount = res.diffPixelCount;
       } else {
-        const verticalAlign: VerticalAlign = 'top';
-        const horizontalAlign: HorizontalAlign = 'left';
+        const [verticalAlign, horizontalAlign] = selectedAlignment.split('-') as [VerticalAlign, HorizontalAlign];
         const paddedA = padImage(mutualWidth, mutualHeight, aPng, verticalAlign, horizontalAlign);
         const paddedB = padImage(mutualWidth, mutualHeight, bPng, verticalAlign, horizontalAlign);
         const res = getDiffDataUri(paddedA, paddedB);
         diffUri = res.diffUri;
         diffPixelCount = res.diffPixelCount;
-        paddedBase64Image = `data:image/png;base64, ${PNG.sync.write(paddedA).toString('base64')}`;
+        paddedBase64Image = `data:image/png;base64, ${PNG.sync.write(paddedB).toString('base64')}`;
       }
     } catch (err) {
       console.error(err);
@@ -83,6 +85,7 @@ async function getHtml({ panel, document, diffTarget, context }: GetHtmlArgs) {
   );
   const styleWebviewUri = panel.webview.asWebviewUri(styleUri);
   const documentWebviewUri = panel.webview.asWebviewUri(document.uri);
+
   return /* html */`
     <!DOCTYPE html>
     <html lang="en">
@@ -109,15 +112,33 @@ async function getHtml({ panel, document, diffTarget, context }: GetHtmlArgs) {
     }
         <script src="${scriptUri}"></script>
         <div id="controls">
-          <vscode-checkbox id="sync-checkbox" checked>Sync</vscode-checkbox>
-          <vscode-checkbox id="diff-checkbox">Diff</vscode-checkbox>
+          <div>
+            <vscode-checkbox id="sync-checkbox" checked>Sync</vscode-checkbox>
+          </div>
+          <div>
+            <vscode-checkbox id="diff-checkbox">Diff</vscode-checkbox>
+          </div>
+          ${paddedBase64Image ? /* html */`
+            <div class="dropdown-container">
+              <vscode-dropdown id="alignment-dropdown">
+              <span slot="indicator" class="codicon codicon-layout"></span>
+              ${alignmentOptions.map(option => (
+                `<vscode-option ${selectedAlignment === option ? 'selected' : ''}>
+                  ${option}
+                </vscode-option>`
+              )).join('\n')}
+              </vscode-dropdown>
+            </div>`
+      : ''
+    }
           ${diffPixelCount === undefined
       ? ''
       : /*html*/`
-              <span>${diffPixelCount} different pixels</span>
+              <div>${diffPixelCount} different pixels</div>
             `}
-            <span id="control-spacer"></span>
-            <span id="scale-indicator"></span>
+            <div id="control-spacer"></div>
+            <div id="scale-indicator"></div>
+
         </div>
       </body>
     </html>
@@ -231,6 +252,7 @@ export class ImageDiffViewer
       document,
       diffTarget,
       context: this.context,
+      selectedAlignment: 'top-left',
     });
     let otherView = diffWebview;
     document.onWebviewOpen((newPanel) => {
@@ -256,7 +278,17 @@ export class ImageDiffViewer
               data: message.data,
             });
           }
+        } else if (message.type === 'change_align') {
+          webviewPanel.webview.html = await getHtml({
+            panel: webviewPanel,
+            document,
+            diffTarget,
+            context: this.context,
+            selectedAlignment: message.data as AlignmentOption,
+          });
         } else {
+          // @ts-expect-error
+          message.type;
           throw new Error("Unsupported message");
         }
       }

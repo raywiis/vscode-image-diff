@@ -1,19 +1,15 @@
 import "./viewer.css";
 import {
   Checkbox,
+  Dropdown,
   provideVSCodeDesignSystem,
   vsCodeButton,
   vsCodeCheckbox,
   vsCodeRadio,
   vsCodeRadioGroup,
+  vsCodeDropdown,
+  vsCodeOption,
 } from "@vscode/webview-ui-toolkit";
-
-provideVSCodeDesignSystem().register(
-  vsCodeButton(),
-  vsCodeCheckbox(),
-  vsCodeRadio(),
-  vsCodeRadioGroup()
-);
 
 function assert(condition: any, errorMessage?: string): asserts condition {
   if (!condition) {
@@ -32,8 +28,30 @@ const features = {
 
 let setDiffView: (show: boolean) => void | undefined;
 
+console.log('reset');
 function showImage() {
+  provideVSCodeDesignSystem().register(
+    vsCodeButton(),
+    vsCodeCheckbox(),
+    vsCodeRadio(),
+    vsCodeRadioGroup(),
+    vsCodeDropdown(),
+    vsCodeOption(),
+  );
+
   // TODO: Use the shared types...
+
+  const alignmentDropdown = document.getElementById('alignment-dropdown');
+  if (alignmentDropdown) {
+    assert(alignmentDropdown instanceof Dropdown);
+    alignmentDropdown.addEventListener('change', () => {
+      vscode.postMessage({
+        type: "change_align",
+        data: alignmentDropdown.value,
+      });
+    });
+  }
+
 
   const scaleIndicator = document.getElementById("scale-indicator");
 

@@ -38,3 +38,8 @@
 #diff-image {
   display: none;
 }
+
+.dropdown-container {
+  display: flex;
+  flex-direction: column;
+}
