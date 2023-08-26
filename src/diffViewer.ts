@@ -45,7 +45,6 @@ async function getHtml({ panel, document, diffTarget, context, selectedAlignment
     )
   );
 
-  console.log({selectedAlignment})
   let diffUri: string | undefined = undefined;
   let diffPixelCount: number | undefined = undefined;
   let paddedBase64Image: string | undefined = undefined;

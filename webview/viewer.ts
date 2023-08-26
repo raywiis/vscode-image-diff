@@ -28,7 +28,6 @@ const features = {
 
 let setDiffView: (show: boolean) => void | undefined;
 
-console.log('reset');
 function showImage() {
   provideVSCodeDesignSystem().register(
     vsCodeButton(),
