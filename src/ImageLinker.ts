@@ -2,13 +2,9 @@ import { WebviewPanel } from "vscode";
 import { getRelPath } from "./getRelPath";
 import { PngDocumentDiffView } from "./PngDocumentDiffView";
 
-type LinkPackage = readonly [
-  document: PngDocumentDiffView,
-  webviewPanel: WebviewPanel,
-] | readonly [
-  undefined,
-  undefined,
-];
+type LinkPackage =
+  | readonly [document: PngDocumentDiffView, webviewPanel: WebviewPanel]
+  | readonly [undefined, undefined];
 
 const emptyLinkPackage: LinkPackage = [undefined, undefined];
 
@@ -16,17 +12,18 @@ export class ImageLinker {
   private pathLink = new Map<string, LinkPackage>();
   private relativePathLinkMap = new Map<string, LinkPackage>();
 
-  addDocumentAndPanel(document: PngDocumentDiffView, webviewPanel: WebviewPanel) {
+  addDocumentAndPanel(
+    document: PngDocumentDiffView,
+    webviewPanel: WebviewPanel,
+  ) {
     const path = document.uri.path;
     const relPath = getRelPath(document.uri);
 
-    if (document.uri.scheme !== 'file') {
+    if (document.uri.scheme !== "file") {
       return;
     }
 
-    const linkPackage: LinkPackage = [
-      document, webviewPanel
-    ];
+    const linkPackage: LinkPackage = [document, webviewPanel];
 
     document.onDispose(() => {
       this.pathLink.delete(path);
@@ -44,9 +41,9 @@ export class ImageLinker {
     await new Promise<void>((r) =>
       setTimeout(() => {
         r();
-      }, 10)
+      }, 10),
     );
-    if (document.uri.scheme === 'file') {
+    if (document.uri.scheme === "file") {
       return emptyLinkPackage;
     }
     if (document.uri.scheme === "git") {

@@ -1,5 +1,5 @@
-import { PNG } from 'pngjs';
-import * as vscode from 'vscode';
+import { PNG } from "pngjs";
+import * as vscode from "vscode";
 
 export class PngDocumentDiffView implements vscode.CustomDocument {
   private disposeEmitter = new vscode.EventEmitter<void>();
@@ -9,7 +9,10 @@ export class PngDocumentDiffView implements vscode.CustomDocument {
   pngPromise: Thenable<PNG>;
   data: Thenable<Uint8Array>;
 
-  constructor(public uri: vscode.Uri, untitledData: Uint8Array | undefined) {
+  constructor(
+    public uri: vscode.Uri,
+    untitledData: Uint8Array | undefined,
+  ) {
     // https://file%2B.vscode-resource.vscode-cdn.net/home/rejus/image-diff/src/collect-payment-spec-js-invoice-actions-should-open-charge-with-credit-card-dialog-for-draft-invoice-snap.png?version%3D1674999497292
     if (untitledData) {
       this.data = Promise.resolve(untitledData);
