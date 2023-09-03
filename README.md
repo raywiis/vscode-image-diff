@@ -1,13 +1,13 @@
 # vscode-image-diff
 
-Replaces the built in image viewer for png images. New viewer features a diff
-view to easily spot differences when viewing image diffs and scroll zooming.
+Replaces the built in image viewer for png images.
 
 ## Features
 
-- Scroll to zoom into images
+- Scroll to zoom
+- Click & drag pan
+- Sync panning when viewing diff
 - Highlight differences with mask from [pixelmatch](https://github.com/mapbox/pixelmatch)!
-- Synchronized panning in diff view
 
 ## Commands
 
