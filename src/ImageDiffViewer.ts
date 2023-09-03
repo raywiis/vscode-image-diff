@@ -9,6 +9,7 @@ import { PngDocumentDiffView } from "./PngDocumentDiffView";
 import { ImageLinker } from "./ImageLinker";
 import { AlignmentOption } from "./padImage";
 import { getWebviewHtml } from "./util/getWebviewHtml";
+import { getExtensionConfiguration } from "./util/getExtensionConfiguration";
 
 export class ImageDiffViewer
   implements vscode.CustomReadonlyEditorProvider<PngDocumentDiffView>
@@ -115,12 +116,13 @@ export class ImageDiffViewer
       enableScripts: true,
       localResourceRoots,
     };
+    const { initialSelectedAlignment } = getExtensionConfiguration();
     webviewPanel.webview.html = await getWebviewHtml({
       panel: webviewPanel,
       document,
       diffTarget,
       context: this.context,
-      selectedAlignment: "top-left",
+      selectedAlignment: initialSelectedAlignment,
     });
     let otherView = diffWebview;
     document.onWebviewOpen((newPanel) => {

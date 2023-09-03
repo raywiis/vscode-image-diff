@@ -2,7 +2,7 @@
   "name": "png-image-diff",
   "displayName": "png-image-diff",
   "description": "Quickly view differences in images when diffing",
-  "version": "0.0.13",
+  "version": "0.0.14",
   "publisher": "raywiis",
   "icon": "marketplace-icon.png",
   "engines": {
@@ -54,7 +54,39 @@
         ],
         "priority": "default"
       }
-    ]
+    ],
+    "configuration": {
+      "title": "Image diff",
+      "properties": {
+        "image-diff.diff.defaultAlignment": {
+          "type": "string",
+          "default": "top-left",
+          "enum": [
+            "top-left",
+            "top-middle",
+            "top-right",
+            "center-left",
+            "center-middle",
+            "center-right",
+            "bottom-left",
+            "bottom-middle",
+            "bottom-right"
+          ],
+          "enumItemLabels": [
+            "Top Left",
+            "Top Middle",
+            "Top Right",
+            "Center Left",
+            "Center Middle",
+            "Center Right",
+            "Bottom Left",
+            "Bottom Middle",
+            "Bottom Right"
+          ],
+          "markdownDescription": "Alignment for images if they don't match in dimensions when making a diff."
+        }
+      }
+    }
   },
   "scripts": {
     "vscode:prepublish": "yarn run compile",

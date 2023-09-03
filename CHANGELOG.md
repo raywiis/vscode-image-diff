@@ -4,6 +4,10 @@ All notable changes to the "image-diff" extension will be documented in this fil
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## 0.0.14
+
+Add an option `image-diff.diff.defaultAlign`
+
 ## 0.0.13
 
 Added a visualization category to the extension listing

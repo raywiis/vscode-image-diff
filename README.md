@@ -20,7 +20,7 @@ view to easily spot differences when viewing image diffs and scroll zooming.
 
 ## Extension Settings
 
-No settings so far
+- `image-diff.diff.defaultAlign` - Sets the default diff alignment for images with different dimensions.
 
 ## Known Issues
 
