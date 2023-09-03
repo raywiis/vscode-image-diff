@@ -133,6 +133,9 @@ export class ImageDiffViewer
         if (message.type === "ready") {
           webviewPanel.webview.postMessage({
             type: "show_image",
+            options: {
+              minScaleOne: getExtensionConfiguration().minScaleOne
+            }
           });
           webviewPanel.webview.postMessage({ type: "enable_transform_report" });
           diffTarget?.registerNewWebview(webviewPanel);

@@ -28,7 +28,7 @@ const features = {
 
 let setDiffView: (show: boolean) => void | undefined;
 
-function showImage() {
+function showImage({ minScaleOne }: { minScaleOne: boolean }) {
   provideVSCodeDesignSystem().register(
     vsCodeButton(),
     vsCodeCheckbox(),
@@ -61,7 +61,9 @@ function showImage() {
 
   const minWidthScale = window.innerWidth / mainImage.naturalWidth;
   const minHeightScale = window.innerHeight / mainImage.naturalHeight;
-  const MIN_SCALE = Math.min(minWidthScale, minHeightScale);
+  const MIN_SCALE = minScaleOne
+    ? Math.min(minWidthScale, minHeightScale, 1)
+    : Math.min(minWidthScale, minHeightScale);
 
   let shownImage = mainImage;
 
@@ -236,7 +238,7 @@ function showImage() {
 let imageApi;
 window.addEventListener("message", (message) => {
   if (message.data.type === "show_image") {
-    imageApi = showImage();
+    imageApi = showImage(message.data.options);
   } else if (message.data.type === "enable_transform_report") {
     features.reportTransform = true;
   } else if (message.data.type === "transform") {

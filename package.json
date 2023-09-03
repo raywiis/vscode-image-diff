@@ -2,7 +2,7 @@
   "name": "png-image-diff",
   "displayName": "png-image-diff",
   "description": "Quickly view differences in images when diffing",
-  "version": "0.0.14",
+  "version": "0.0.15",
   "publisher": "raywiis",
   "icon": "marketplace-icon.png",
   "engines": {
@@ -56,9 +56,16 @@
       }
     ],
     "configuration": {
-      "title": "Image diff",
+      "title": "Image Diff",
       "properties": {
+        "image-diff.viewer.minScaleOne" :{
+          "order": 0,
+          "type": "boolean",
+          "default": false,
+          "markdownDescription": "Always have at least 1 as the minimum scale.\n\n> Might be useful if your images are smaller than your viewport"
+        },
         "image-diff.diff.defaultAlignment": {
+          "order": 10,
           "type": "string",
           "default": "top-left",
           "enum": [

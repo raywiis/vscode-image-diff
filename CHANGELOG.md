@@ -4,6 +4,10 @@ All notable changes to the "image-diff" extension will be documented in this fil
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## 0.0.15
+
+Add an option `image-diff.viewer.minScaleOne`
+
 ## 0.0.14
 
 Add an option `image-diff.diff.defaultAlign`

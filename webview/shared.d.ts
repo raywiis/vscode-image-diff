@@ -4,6 +4,9 @@ export type ShowImageMessage = {
     type: "Buffer";
     data: number[];
   };
+  options: {
+    minScaleOne: boolean;
+  };
 };
 
 export type EnableTransformReport = {

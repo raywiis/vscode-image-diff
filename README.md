@@ -20,6 +20,7 @@ view to easily spot differences when viewing image diffs and scroll zooming.
 
 ## Extension Settings
 
+- `image-diff.viewer.minScaleOne` - Will always have 1 or less as the minimum scale
 - `image-diff.diff.defaultAlign` - Sets the default diff alignment for images with different dimensions.
 
 ## Known Issues
