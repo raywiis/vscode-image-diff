@@ -11,6 +11,7 @@ import {
   vsCodeDropdown,
   vsCodeOption,
 } from "@vscode/webview-ui-toolkit";
+import { sendMessageToHost } from "./vsCodeApi";
 
 function assert(condition: any, errorMessage?: string): asserts condition {
   if (!condition) {
@@ -29,9 +30,6 @@ function bootstrapVSCodeDesignSystem() {
   );
 }
 
-// @ts-expect-error
-const vscode = acquireVsCodeApi();
-
 document.body.style.overflow = "hidden";
 
 const features = {
@@ -47,7 +45,7 @@ function showImage({ minScaleOne }: { minScaleOne: boolean }) {
   if (alignmentDropdown) {
     assert(alignmentDropdown instanceof Dropdown);
     alignmentDropdown.addEventListener("change", () => {
-      vscode.postMessage({
+      sendMessageToHost({
         type: "change_align",
         data: alignmentDropdown.value,
       });
@@ -172,7 +170,7 @@ function showImage({ minScaleOne }: { minScaleOne: boolean }) {
 
     shownImage.style.transform = `matrix(${scale}, 0, 0, ${scale}, ${initialX}, ${initialY})`;
     if (features.reportTransform && !silent && sync) {
-      vscode.postMessage({
+      sendMessageToHost({
         type: "transform",
         data: { x: initialX, y: initialY, scale },
       });
@@ -271,4 +269,4 @@ window.addEventListener(
   },
 );
 
-vscode.postMessage({ type: "ready" });
+sendMessageToHost({ type: "ready" });
