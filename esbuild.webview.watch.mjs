@@ -1,5 +1,5 @@
 import * as esbuild from 'esbuild';
-import buildOptions from './buildOptions.mjs';
+import buildOptions from './esbuildOptions.webview.mjs';
 
 let ctx = await esbuild.context(buildOptions);
 

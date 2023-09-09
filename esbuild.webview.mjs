@@ -1,4 +1,4 @@
 import * as esbuild from 'esbuild';
-import buildOptions from './buildOptions.mjs';
+import buildOptions from './esbuildOptions.webview.mjs';
 
 await esbuild.build(buildOptions);

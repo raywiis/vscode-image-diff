@@ -103,8 +103,8 @@
     "lint": "eslint src --ext ts",
     "test": "node ./out/test/runTest.js",
     "fmt": "prettier --write src",
-    "pack:webview": "node ./esbuild.mjs",
-    "pack:webview:watch": "node ./esbuild.watch.mjs",
+    "pack:webview": "node ./esbuild.webview.mjs",
+    "pack:webview:watch": "node ./esbuild.webview.watch.mjs",
     "check:types:webview": "tsc -p ./webview/tsconfig.json",
     "check:types:webview:watch": "tsc --watch -p ./webview/tsconfig.json"
   },
