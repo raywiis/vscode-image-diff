@@ -53,6 +53,7 @@ function showImage({ minScaleOne }: { minScaleOne: boolean }) {
 
 
   const scaleIndicator = document.getElementById("scale-indicator");
+  assert(scaleIndicator);
 
   const mainImage = document.getElementById("main-image");
   const diffImage = document.getElementById('diff-image');
@@ -235,7 +236,7 @@ function showImage({ minScaleOne }: { minScaleOne: boolean }) {
   return { setTransform };
 }
 
-let imageApi;
+let imageApi: ReturnType<typeof showImage> | undefined;
 window.addEventListener("message", (message) => {
   if (message.data.type === "show_image") {
     imageApi = showImage(message.data.options);

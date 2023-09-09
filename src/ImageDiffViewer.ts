@@ -2,7 +2,7 @@ import * as vscode from "vscode";
 import {
   HostToWebviewMessages,
   WebviewToHostMessages,
-} from "../webview/shared";
+} from "./webview/shared";
 import { dirname } from "node:path";
 import { isGithubPRExtensionUri } from "./isGithubPRExtensionUri";
 import { PngDocumentDiffView } from "./PngDocumentDiffView";

@@ -98,18 +98,15 @@
   },
   "scripts": {
     "vscode:prepublish": "yarn run compile",
-    "compile": "yarn run pack:extension && yarn run pack:webview",
-    "watch": "tsc -watch -p ./",
+    "compile": "yarn types && yarn run pack:extension && yarn run pack:webview",
     "pretest": "yarn run compile && yarn run lint",
     "lint": "eslint src --ext ts",
-    "test": "node ./out/test/runTest.js",
     "fmt": "prettier --write src",
     "pack:extension": "node ./esbuild.extension.mjs",
     "pack:extension:watch": "node ./esbuild.extension.watch.mjs",
     "pack:webview": "node ./esbuild.webview.mjs",
     "pack:webview:watch": "node ./esbuild.webview.watch.mjs",
-    "check:types:webview": "tsc -p ./webview/tsconfig.json",
-    "check:types:webview:watch": "tsc --watch -p ./webview/tsconfig.json"
+    "types": "tsc"
   },
   "devDependencies": {
     "@types/glob": "^8.0.0",
