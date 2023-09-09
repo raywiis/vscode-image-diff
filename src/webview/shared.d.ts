@@ -28,15 +28,19 @@ export type WebviewTransformMessage = {
 };
 
 export type WebviewChangeDiffAlignMessage = {
-  type: 'change_align';
+  type: "change_align";
   data: string;
 };
 
 export type ToggleDiffMessage = {
-  type: "toggle_diff",
-}
+  type: "toggle_diff";
+};
 
-export type HostToWebviewMessages = ShowImageMessage | TransformWebviewMessage | ToggleDiffMessage;
+export type HostToWebviewMessages =
+  | ShowImageMessage
+  | TransformWebviewMessage
+  | ToggleDiffMessage
+  | EnableTransformReport;
 
 export type WebviewToHostMessages =
   | WebviewReadyMessage

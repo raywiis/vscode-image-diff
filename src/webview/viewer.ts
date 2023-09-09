@@ -1,3 +1,4 @@
+import { HostToWebviewMessages } from "./shared";
 import "./viewer.css";
 import {
   Checkbox,
@@ -13,9 +14,20 @@ import {
 
 function assert(condition: any, errorMessage?: string): asserts condition {
   if (!condition) {
-    throw new Error(errorMessage || 'Assertion error');
+    throw new Error(errorMessage || "Assertion error");
   }
-};
+}
+
+function bootstrapVSCodeDesignSystem() {
+  provideVSCodeDesignSystem().register(
+    vsCodeButton(),
+    vsCodeCheckbox(),
+    vsCodeRadio(),
+    vsCodeRadioGroup(),
+    vsCodeDropdown(),
+    vsCodeOption(),
+  );
+}
 
 // @ts-expect-error
 const vscode = acquireVsCodeApi();
@@ -29,21 +41,12 @@ const features = {
 let setDiffView: (show: boolean) => void | undefined;
 
 function showImage({ minScaleOne }: { minScaleOne: boolean }) {
-  provideVSCodeDesignSystem().register(
-    vsCodeButton(),
-    vsCodeCheckbox(),
-    vsCodeRadio(),
-    vsCodeRadioGroup(),
-    vsCodeDropdown(),
-    vsCodeOption(),
-  );
+  bootstrapVSCodeDesignSystem();
 
-  // TODO: Use the shared types...
-
-  const alignmentDropdown = document.getElementById('alignment-dropdown');
+  const alignmentDropdown = document.getElementById("alignment-dropdown");
   if (alignmentDropdown) {
     assert(alignmentDropdown instanceof Dropdown);
-    alignmentDropdown.addEventListener('change', () => {
+    alignmentDropdown.addEventListener("change", () => {
       vscode.postMessage({
         type: "change_align",
         data: alignmentDropdown.value,
@@ -51,12 +54,11 @@ function showImage({ minScaleOne }: { minScaleOne: boolean }) {
     });
   }
 
-
   const scaleIndicator = document.getElementById("scale-indicator");
   assert(scaleIndicator);
 
   const mainImage = document.getElementById("main-image");
-  const diffImage = document.getElementById('diff-image');
+  const diffImage = document.getElementById("diff-image");
 
   assert(mainImage && mainImage instanceof HTMLImageElement);
 
@@ -111,12 +113,12 @@ function showImage({ minScaleOne }: { minScaleOne: boolean }) {
     assert(diffImage instanceof HTMLImageElement);
     if (show) {
       shownImage = diffImage;
-      diffImage.style.display = 'block';
-      mainImage.style.display = 'none';
+      diffImage.style.display = "block";
+      mainImage.style.display = "none";
     } else {
       shownImage = mainImage;
-      mainImage.style.display = 'block';
-      diffImage.style.display = 'none';
+      mainImage.style.display = "block";
+      diffImage.style.display = "none";
     }
     setTransform(initialX, initialY, scale);
   };
@@ -124,26 +126,26 @@ function showImage({ minScaleOne }: { minScaleOne: boolean }) {
   if (diffImage) {
     assert(diffImage instanceof HTMLImageElement);
 
-    diffImage.addEventListener('wheel', handleWheelEventOnImage);
+    diffImage.addEventListener("wheel", handleWheelEventOnImage);
 
-    const syncCheckbox = document.getElementById('sync-checkbox');
-    const diffCheckbox = document.getElementById('diff-checkbox');
+    const syncCheckbox = document.getElementById("sync-checkbox");
+    const diffCheckbox = document.getElementById("diff-checkbox");
 
     assert(syncCheckbox && diffCheckbox);
     assert(syncCheckbox instanceof Checkbox);
     syncCheckbox.checked = true;
     sync = true;
-    syncCheckbox.addEventListener('click', (event) => {
+    syncCheckbox.addEventListener("click", (event) => {
       assert(event.target instanceof Checkbox);
       sync = event.target.checked;
     });
-    diffCheckbox.addEventListener('click', (event) => {
+    diffCheckbox.addEventListener("click", (event) => {
       assert(event.target instanceof Checkbox);
       const showDiff = event.target.checked;
       setDiffView(showDiff);
     });
-    syncCheckbox.style.display = 'inline-flex';
-    diffCheckbox.style.display = 'inline-flex';
+    syncCheckbox.style.display = "inline-flex";
+    diffCheckbox.style.display = "inline-flex";
   }
 
   scaleIndicator.innerText = `Scale: ${scale.toFixed(4)}`;
@@ -151,7 +153,7 @@ function showImage({ minScaleOne }: { minScaleOne: boolean }) {
     x: number,
     y: number,
     newScale: number,
-    { silent = false } = {}
+    { silent = false } = {},
   ) => {
     newScale = Math.max(MIN_SCALE, newScale);
     const onScreenWidth = shownImage.clientWidth * newScale;
@@ -176,7 +178,6 @@ function showImage({ minScaleOne }: { minScaleOne: boolean }) {
       });
     }
   };
-
 
   const clamp = (min: number, max: number, target: number) => {
     return Math.min(Math.max(min, target), max);
@@ -229,7 +230,6 @@ function showImage({ minScaleOne }: { minScaleOne: boolean }) {
     stopDrag(event.clientX, event.clientY);
   });
 
-
   mainImage.addEventListener("wheel", handleWheelEventOnImage);
   setTransform(initialX, initialY, scale, { silent: true });
 
@@ -237,35 +237,38 @@ function showImage({ minScaleOne }: { minScaleOne: boolean }) {
 }
 
 let imageApi: ReturnType<typeof showImage> | undefined;
-window.addEventListener("message", (message) => {
-  if (message.data.type === "show_image") {
-    imageApi = showImage(message.data.options);
-  } else if (message.data.type === "enable_transform_report") {
-    features.reportTransform = true;
-  } else if (message.data.type === "transform") {
-    if (!imageApi) {
-      throw new Error("No setTransform");
-    }
-    imageApi.setTransform(
-      message.data.data.x,
-      message.data.data.y,
-      message.data.data.scale,
-      { silent: true }
-    );
-  } else if (message.data.type = 'toggle_diff') {
-    try {
-      const diffCheckbox = document.getElementById('diff-checkbox');
-      if (diffCheckbox instanceof Checkbox) {
-        const shouldShowDiff = !diffCheckbox.checked;
-        diffCheckbox.checked = shouldShowDiff;
-        setDiffView(shouldShowDiff);
+window.addEventListener(
+  "message",
+  (message: MessageEvent<HostToWebviewMessages>) => {
+    if (message.data.type === "show_image") {
+      imageApi = showImage(message.data.options);
+    } else if (message.data.type === "enable_transform_report") {
+      features.reportTransform = true;
+    } else if (message.data.type === "transform") {
+      if (!imageApi) {
+        throw new Error("No setTransform");
       }
-    } catch (error) {
-      console.error(error);
+      imageApi.setTransform(
+        message.data.data.x,
+        message.data.data.y,
+        message.data.data.scale,
+        { silent: true },
+      );
+    } else if ((message.data.type = "toggle_diff")) {
+      try {
+        const diffCheckbox = document.getElementById("diff-checkbox");
+        if (diffCheckbox instanceof Checkbox) {
+          const shouldShowDiff = !diffCheckbox.checked;
+          diffCheckbox.checked = shouldShowDiff;
+          setDiffView(shouldShowDiff);
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    } else {
+      throw new Error("Unsupported message");
     }
-  } else {
-    throw new Error("Unsupported message");
-  }
-});
+  },
+);
 
 vscode.postMessage({ type: "ready" });

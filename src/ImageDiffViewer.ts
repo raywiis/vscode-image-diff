@@ -1,8 +1,5 @@
 import * as vscode from "vscode";
-import {
-  HostToWebviewMessages,
-  WebviewToHostMessages,
-} from "./webview/shared";
+import { HostToWebviewMessages, WebviewToHostMessages } from "./webview/shared";
 import { dirname } from "node:path";
 import { isGithubPRExtensionUri } from "./isGithubPRExtensionUri";
 import { PngDocumentDiffView } from "./PngDocumentDiffView";
@@ -134,8 +131,8 @@ export class ImageDiffViewer
           webviewPanel.webview.postMessage({
             type: "show_image",
             options: {
-              minScaleOne: getExtensionConfiguration().minScaleOne
-            }
+              minScaleOne: getExtensionConfiguration().minScaleOne,
+            },
           });
           webviewPanel.webview.postMessage({ type: "enable_transform_report" });
           diffTarget?.registerNewWebview(webviewPanel);
