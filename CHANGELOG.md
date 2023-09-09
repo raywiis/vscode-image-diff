@@ -4,6 +4,10 @@ All notable changes to the "image-diff" extension will be documented in this fil
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## 0.0.18
+
+Slight refactor to image controlling logic
+
 ## 0.0.17
 
 Add packaging for the extension. No extra functionality.
