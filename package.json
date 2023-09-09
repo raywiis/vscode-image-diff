@@ -5,6 +5,7 @@
   "version": "0.0.16",
   "publisher": "raywiis",
   "icon": "marketplace-icon.png",
+  "license": "MIT",
   "engines": {
     "vscode": "^1.74.0"
   },
@@ -97,12 +98,14 @@
   },
   "scripts": {
     "vscode:prepublish": "yarn run compile",
-    "compile": "tsc -p ./ && yarn run pack:webview",
+    "compile": "yarn run pack:extension && yarn run pack:webview",
     "watch": "tsc -watch -p ./",
     "pretest": "yarn run compile && yarn run lint",
     "lint": "eslint src --ext ts",
     "test": "node ./out/test/runTest.js",
     "fmt": "prettier --write src",
+    "pack:extension": "node ./esbuild.extension.mjs",
+    "pack:extension:watch": "node ./esbuild.extension.watch.mjs",
     "pack:webview": "node ./esbuild.webview.mjs",
     "pack:webview:watch": "node ./esbuild.webview.watch.mjs",
     "check:types:webview": "tsc -p ./webview/tsconfig.json",

@@ -19,8 +19,10 @@
     {
       "label": "build_extension",
       "type": "npm",
-      "script": "watch",
-      "problemMatcher": "$tsc-watch",
+      "script": "pack:extension:watch",
+      "problemMatcher":[
+        "$esbuild-watch"
+      ],
       "isBackground": true,
       "presentation": {
         "reveal": "never"
