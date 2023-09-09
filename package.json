@@ -107,7 +107,8 @@
     "pack:extension:watch": "node ./esbuild.extension.watch.mjs",
     "pack:webview": "node ./esbuild.webview.mjs",
     "pack:webview:watch": "node ./esbuild.webview.watch.mjs",
-    "types": "tsc"
+    "types": "tsc",
+    "types:watch": "tsc --watch"
   },
   "devDependencies": {
     "@types/glob": "^8.0.0",

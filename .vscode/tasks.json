@@ -46,7 +46,7 @@
     {
       "label": "typecheck_extension",
       "type": "npm",
-      "script": "check:types:webview:watch",
+      "script": "types:watch",
       "problemMatcher": [
         "$tsc-watch"
       ],
