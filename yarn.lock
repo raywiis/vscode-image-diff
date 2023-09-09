@@ -528,14 +528,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@vscode/vsce@npm:^2.19.0":
-  version: 2.19.0
-  resolution: "@vscode/vsce@npm:2.19.0"
+"@vscode/vsce@npm:^2.21.0":
+  version: 2.21.0
+  resolution: "@vscode/vsce@npm:2.21.0"
   dependencies:
     azure-devops-node-api: ^11.0.1
     chalk: ^2.4.2
     cheerio: ^1.0.0-rc.9
-    commander: ^6.1.0
+    commander: ^6.2.1
     glob: ^7.0.6
     hosted-git-info: ^4.0.2
     jsonc-parser: ^3.2.0
@@ -546,7 +546,7 @@ __metadata:
     minimatch: ^3.0.3
     parse-semver: ^1.1.1
     read: ^1.0.7
-    semver: ^5.1.0
+    semver: ^7.5.2
     tmp: ^0.2.1
     typed-rest-client: ^1.8.4
     url-join: ^4.0.1
@@ -558,7 +558,7 @@ __metadata:
       optional: true
   bin:
     vsce: vsce
-  checksum: 9f06978c431949041dfeb790953427fc8e1f2ba614824b9ab5ad715b20baf7a5d680144dfd9d800c26a23e15fefa3cc0ffec432dc9970fd6751c4b0794ca7a0f
+  checksum: 1618059f53d8b56c65e67a1aaf0af9b5eb666a3031c5ab0bfb761794110627fc0ff59d1641effcbce57104f2b27013cfcc2a6c40b9a9629965fadb1706b6f35b
   languageName: node
   linkType: hard
 
@@ -1061,7 +1061,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"commander@npm:^6.1.0":
+"commander@npm:^6.2.1":
   version: 6.2.1
   resolution: "commander@npm:6.2.1"
   checksum: d7090410c0de6bc5c67d3ca41c41760d6d268f3c799e530aafb73b7437d1826bbf0d2a3edac33f8b57cc9887b4a986dce307fa5557e109be40eadb7c43b21742
@@ -2913,7 +2913,7 @@ __metadata:
     "@typescript-eslint/parser": ^5.45.0
     "@vscode/codicons": ^0.0.32
     "@vscode/test-electron": ^2.2.0
-    "@vscode/vsce": ^2.19.0
+    "@vscode/vsce": ^2.21.0
     "@vscode/webview-ui-toolkit": ^1.2.1
     esbuild: ^0.17.5
     eslint: ^8.28.0
@@ -3202,7 +3202,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"semver@npm:^7.3.5, semver@npm:^7.3.7":
+"semver@npm:^7.3.5, semver@npm:^7.3.7, semver@npm:^7.5.2":
   version: 7.5.4
   resolution: "semver@npm:7.5.4"
   dependencies:
