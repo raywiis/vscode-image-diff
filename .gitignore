@@ -2,6 +2,6 @@ out
 dist
 node_modules
 .vscode-test/
-.yarn/
+.yarn/*
 !.yarn/releases
 *.vsix
