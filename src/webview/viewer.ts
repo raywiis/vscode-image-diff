@@ -91,7 +91,12 @@ function showImage({ minScaleOne }: { minScaleOne: boolean }) {
     diffCheckbox.style.display = "inline-flex";
   }
 
-  return imageController;
+  return {setTransform: (x: number, y: number, scale: number) => {
+    scaleIndicator.innerText = `Scale: ${scale.toFixed(4)}`;
+    imageController.setTransform(x, y, scale, true);
+  }, setDiffView: (show:boolean) => {
+    imageController.setDiffView(show);
+  }};
 }
 
 let imageApi: ReturnType<typeof showImage> | undefined;
@@ -110,7 +115,6 @@ window.addEventListener(
         message.data.data.x,
         message.data.data.y,
         message.data.data.scale,
-        true,
       );
     } else if ((message.data.type = "toggle_diff")) {
       try {

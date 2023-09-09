@@ -150,7 +150,6 @@ export class ImageController extends EventTarget {
     newScale: number,
     silent = false
   ) {
-    // TODO: Silent transforms don't update scale indicator - transform from neighbor webview doesn't update scale indicator
     newScale = Math.max(this.minScale, newScale);
     const onScreenWidth = this.shownImage.clientWidth * newScale;
     const onScreenHeight = this.shownImage.clientHeight * newScale;
