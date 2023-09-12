@@ -49,7 +49,7 @@ function showImage({ minScaleOne }: { minScaleOne: boolean }) {
 
   const imageController = new ImageController({ minScaleOne });
 
-  imageController.addEventListener('transform', (event) => {
+  imageController.addEventListener("transform", (event) => {
     assert(event instanceof TransformEvent);
     const { x, y, scale } = event;
     scaleIndicator.innerText = `Scale: ${scale.toFixed(4)}`;
@@ -82,12 +82,15 @@ function showImage({ minScaleOne }: { minScaleOne: boolean }) {
     });
   }
 
-  return {setTransform: (x: number, y: number, scale: number) => {
-    scaleIndicator.innerText = `Scale: ${scale.toFixed(4)}`;
-    imageController.setTransform(x, y, scale, true);
-  }, setDiffView: (show:boolean) => {
-    imageController.setDiffView(show);
-  }};
+  return {
+    setTransform: (x: number, y: number, scale: number) => {
+      scaleIndicator.innerText = `Scale: ${scale.toFixed(4)}`;
+      imageController.setTransform(x, y, scale, true);
+    },
+    setDiffView: (show: boolean) => {
+      imageController.setDiffView(show);
+    },
+  };
 }
 
 let imageApi: ReturnType<typeof showImage> | undefined;

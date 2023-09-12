@@ -6,7 +6,7 @@ export class TransformEvent extends Event {
   scale: number;
 
   constructor(x: number, y: number, scale: number) {
-    super('transform');
+    super("transform");
     this.x = x;
     this.y = y;
     this.scale = scale;
@@ -29,7 +29,6 @@ export class ImageController extends EventTarget {
 
   hasDiff = false;
   inDiff = false;
-
 
   constructor(options: { minScaleOne: boolean }) {
     super();
@@ -64,13 +63,13 @@ export class ImageController extends EventTarget {
     this.scale = this.minScale;
     this.hasDiff = !!this.diffImage;
 
-    mainImage.addEventListener('wheel', this.handleWheelEvent.bind(this));
-    diffImage?.addEventListener('wheel', this.handleWheelEvent.bind(this));
+    mainImage.addEventListener("wheel", this.handleWheelEvent.bind(this));
+    diffImage?.addEventListener("wheel", this.handleWheelEvent.bind(this));
 
-    document.addEventListener('mousedown', this.startDrag.bind(this));
-    document.addEventListener('mousemove',this.updateDrag.bind(this));
-    document.addEventListener('mouseup', this.stopDrag.bind(this));
-    document.addEventListener('mouseleave', this.stopDrag.bind(this));
+    document.addEventListener("mousedown", this.startDrag.bind(this));
+    document.addEventListener("mousemove", this.updateDrag.bind(this));
+    document.addEventListener("mouseup", this.stopDrag.bind(this));
+    document.addEventListener("mouseleave", this.stopDrag.bind(this));
 
     this.setTransform(this.initialX, this.initialY, this.scale);
   }
@@ -140,12 +139,7 @@ export class ImageController extends EventTarget {
     this.setTransform(this.initialX, this.initialY, this.scale);
   }
 
-  setTransform(
-    x: number,
-    y: number,
-    newScale: number,
-    silent = false
-  ) {
+  setTransform(x: number, y: number, newScale: number, silent = false) {
     newScale = Math.max(this.minScale, newScale);
     const onScreenWidth = this.shownImage.clientWidth * newScale;
     const onScreenHeight = this.shownImage.clientHeight * newScale;
@@ -162,11 +156,13 @@ export class ImageController extends EventTarget {
     this.shownImage.style.transform = `matrix(${this.scale}, 0, 0, ${this.scale}, ${this.initialX}, ${this.initialY})`;
 
     if (!silent) {
-      this.dispatchEvent(new TransformEvent(this.initialX, this.initialY, this.scale));
+      this.dispatchEvent(
+        new TransformEvent(this.initialX, this.initialY, this.scale),
+      );
     }
   }
 }
 
 function clamp(min: number, max: number, target: number) {
   return Math.min(Math.max(min, target), max);
-};
+}

@@ -111,6 +111,8 @@ export async function getWebviewHtml({
         <link href="${styleWebviewUri}" rel="stylesheet"/>
       </head>
       <body>
+
+        <div>${document.uri.toString()}</div>
         <img id="main-image" src="${paddedBase64Image ?? documentWebviewUri}" />
         ${
           diffUri
@@ -156,7 +158,6 @@ export async function getWebviewHtml({
           }
             <div id="control-spacer"></div>
             <div id="scale-indicator"></div>
-
         </div>
       </body>
     </html>
