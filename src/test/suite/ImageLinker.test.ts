@@ -35,7 +35,7 @@ suite("ImageLinker", () => {
         const documentB = new PngDocumentDiffView(uriB, new Uint8Array());
         const webviewPanel = vscode.window.createWebviewPanel(
           "image-diff",
-          "test",
+          filename,
           vscode.ViewColumn.Active,
         );
 
