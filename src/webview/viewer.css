@@ -1,3 +1,7 @@
+body {
+  overflow: hidden;
+}
+
 #main-image,
 #diff-image {
   max-width: unset;
@@ -37,6 +41,11 @@
 #diff-checkbox,
 #diff-image {
   display: none;
+}
+
+#sync-checkbox,
+#diff-checkbox {
+  display: inline-flex;
 }
 
 .dropdown-container {

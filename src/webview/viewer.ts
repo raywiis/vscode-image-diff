@@ -31,8 +31,6 @@ function bootstrapVSCodeDesignSystem() {
   );
 }
 
-document.body.style.overflow = "hidden";
-
 const features = {
   reportTransform: false,
 };
@@ -87,8 +85,6 @@ function showImage({ minScaleOne }: { minScaleOne: boolean }) {
       const showDiff = event.target.checked;
       imageController.setDiffView(showDiff);
     });
-    syncCheckbox.style.display = "inline-flex";
-    diffCheckbox.style.display = "inline-flex";
   }
 
   return {setTransform: (x: number, y: number, scale: number) => {
