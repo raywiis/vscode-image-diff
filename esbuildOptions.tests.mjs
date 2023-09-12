@@ -6,8 +6,6 @@ const testSuiteFiles = fs.readdirSync(testSuiteRoot).map(filename => {
   return path.join(testSuiteRoot, filename);
 });
 
-console.log(testSuiteFiles)
-
 /**
  * @type {import('esbuild').BuildOptions}
  */

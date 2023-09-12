@@ -1578,6 +1578,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"fast-check@npm:^3.13.0":
+  version: 3.13.0
+  resolution: "fast-check@npm:3.13.0"
+  dependencies:
+    pure-rand: ^6.0.0
+  checksum: 5bbc41214c8dea95b5e31d67605586c60ba863f3b1c37b447c4f6637c20df4ce0b8fa286a51558fff439625f865be90a2cc07e909545b47f5638efb9e57f8f85
+  languageName: node
+  linkType: hard
+
 "fast-deep-equal@npm:^3.1.1, fast-deep-equal@npm:^3.1.3":
   version: 3.1.3
   resolution: "fast-deep-equal@npm:3.1.3"
@@ -2917,6 +2926,7 @@ __metadata:
     "@vscode/webview-ui-toolkit": ^1.2.1
     esbuild: ^0.17.5
     eslint: ^8.28.0
+    fast-check: ^3.13.0
     glob: ^8.0.3
     mocha: ^10.1.0
     pixelmatch: ^5.3.0
@@ -3002,6 +3012,13 @@ __metadata:
   version: 2.1.1
   resolution: "punycode@npm:2.1.1"
   checksum: 823bf443c6dd14f669984dea25757b37993f67e8d94698996064035edd43bed8a5a17a9f12e439c2b35df1078c6bec05a6c86e336209eb1061e8025c481168e8
+  languageName: node
+  linkType: hard
+
+"pure-rand@npm:^6.0.0":
+  version: 6.0.3
+  resolution: "pure-rand@npm:6.0.3"
+  checksum: d08701cfd1528c5f9cdca996776c498c92767722561f9b8f9e62645d5025c8a3bf60b90f76f262aaab124e6bb1d58e1b0850722dbca2846a19b708801956e56b
   languageName: node
   linkType: hard
 
