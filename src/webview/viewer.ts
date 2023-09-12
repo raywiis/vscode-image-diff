@@ -13,12 +13,7 @@ import {
 } from "@vscode/webview-ui-toolkit";
 import { sendMessageToHost } from "./vsCodeApi";
 import { ImageController, TransformEvent } from "./ImageController";
-
-function assert(condition: any, errorMessage?: string): asserts condition {
-  if (!condition) {
-    throw new Error(errorMessage || "Assertion error");
-  }
-}
+import { assert } from "./assert";
 
 function bootstrapVSCodeDesignSystem() {
   provideVSCodeDesignSystem().register(

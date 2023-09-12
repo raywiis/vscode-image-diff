@@ -1,8 +1,4 @@
-function assert(condition: any, errorMessage?: string): asserts condition {
-  if (!condition) {
-    throw new Error(errorMessage || "Assertion error");
-  }
-}
+import { assert } from "./assert";
 
 export class TransformEvent extends Event {
   x: number;
