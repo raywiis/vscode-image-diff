@@ -23,12 +23,8 @@ suite("ImageLinker", () => {
             ref: "~",
           }),
         );
-        const matchingUris = [
-          `file:///home/${username}/repo/${filename}.png`,
-          `git:/home/${username}/repo/${filename}.png?${gitParam}`,
-        ];
-
-        const [a, b] = matchingUris;
+        const a = `file:///home/${username}/repo/${filename}.png`;
+        const b = `git:/home/${username}/repo/${filename}.png?${gitParam}`;
         const uriA = vscode.Uri.parse(a);
         const uriB = vscode.Uri.parse(b);
         const documentA = new PngDocumentDiffView(uriA, new Uint8Array());
