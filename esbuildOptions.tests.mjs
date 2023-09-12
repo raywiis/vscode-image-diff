@@ -11,12 +11,13 @@ const testSuiteFiles = fs.readdirSync(testSuiteRoot).map(filename => {
  */
 const buildOptions = {
   entryPoints: ['./src/test/runTest.ts', ...testSuiteFiles],
+  bundle: true,
   outdir: "./out/test/",
   logLevel: 'info',
   sourcemap: 'inline',
   platform: 'node',
   format: 'cjs',
-  // external: ['vscode']
+  external: ['vscode', 'mocha']
 };
 
 export default buildOptions;
