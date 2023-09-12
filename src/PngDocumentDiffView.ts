@@ -6,7 +6,7 @@ export class PngDocumentDiffView implements vscode.CustomDocument {
   private newWebviewEmitter = new vscode.EventEmitter<vscode.WebviewPanel>();
   public onWebviewOpen = this.newWebviewEmitter.event;
   public onDispose = this.disposeEmitter.event;
-  pngPromise: Thenable<PNG>;
+  _pngPromise?: Thenable<PNG>;
   data: Thenable<Uint8Array>;
 
   constructor(
@@ -19,10 +19,15 @@ export class PngDocumentDiffView implements vscode.CustomDocument {
     } else {
       this.data = vscode.workspace.fs.readFile(uri);
     }
+  }
 
-    this.pngPromise = this.data.then((buffer) => {
-      return PNG.sync.read(Buffer.from(buffer));
-    });
+  get pngPromise(): Thenable<PNG> {
+    if (!this._pngPromise) {
+      this._pngPromise = this.data.then((buffer) =>
+        PNG.sync.read(Buffer.from(buffer)),
+      );
+    }
+    return this._pngPromise;
   }
 
   registerNewWebview(webviewPanel: vscode.WebviewPanel) {
