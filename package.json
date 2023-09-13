@@ -100,7 +100,7 @@
     "vscode:prepublish": "yarn run build",
     "build": "yarn types && yarn run pack:extension && yarn run pack:webview",
     "pretest": "yarn run build && yarn run lint",
-    "test": "node ./esbuild.tests.mjs && node ./out/test/runTest.js",
+    "test": "node ./esbuild.tests.mjs && node --enable-source-maps ./out/test/runTest.js ",
     "lint": "eslint src --ext ts",
     "fmt": "prettier --write src",
     "pack:extension": "node ./esbuild.extension.mjs",
