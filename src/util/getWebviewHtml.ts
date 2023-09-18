@@ -23,9 +23,10 @@ function generateDiffData(a: PNG, b: PNG, alignment: AlignmentOption) {
     } as const;
   }
 
-  const [verticalAlign, horizontalAlign] = alignment.split(
-    "-",
-  ) as [VerticalAlign, HorizontalAlign];
+  const [verticalAlign, horizontalAlign] = alignment.split("-") as [
+    VerticalAlign,
+    HorizontalAlign,
+  ];
   const paddedA = padImage(
     mutualWidth,
     mutualHeight,
@@ -79,10 +80,13 @@ export async function getWebviewHtml({
   let diffResults: ReturnType<typeof generateDiffData> | undefined;
   if (diffTarget) {
     try {
-      const aPng = await diffTarget.pngPromise;
-      const bPng = await document.pngPromise;
-
-      diffResults = generateDiffData(aPng, bPng, selectedAlignment);
+      const [aPng, bPng] = await Promise.all([
+        diffTarget.pngPromise,
+        document.pngPromise,
+      ]);
+      if (aPng.ok && bPng.ok) {
+        diffResults = generateDiffData(aPng.t, bPng.t, selectedAlignment);
+      }
     } catch (err) {
       console.error(err);
     }
@@ -114,8 +118,13 @@ export async function getWebviewHtml({
         <link href="${styleUri}" rel="stylesheet"/>
       </head>
       <body>
-
-        <img id="main-image" src="${diffResults?.paddedBase64Image ?? documentWebviewUri}" />
+        <div id="error">
+          <span id="error-icon" class="codicon codicon-warning"></span>
+          <div id="error-message"></div>
+        </div>
+        <img id="main-image" src="${
+          diffResults?.paddedBase64Image ?? documentWebviewUri
+        }" />
         ${
           diffResults
             ? /* html */ `

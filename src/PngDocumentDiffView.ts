@@ -1,13 +1,14 @@
 import { PNG } from "pngjs";
 import * as vscode from "vscode";
+import { Maybe } from "./util/maybe";
 
 export class PngDocumentDiffView implements vscode.CustomDocument {
   private disposeEmitter = new vscode.EventEmitter<void>();
   private newWebviewEmitter = new vscode.EventEmitter<vscode.WebviewPanel>();
-  private _pngPromise?: Thenable<PNG>;
+  private _pngPromise?: Thenable<Maybe<PNG>>;
   public onWebviewOpen = this.newWebviewEmitter.event;
   public onDispose = this.disposeEmitter.event;
-  data: Thenable<Uint8Array>;
+  private data: Thenable<Uint8Array>;
 
   constructor(
     public uri: vscode.Uri,
@@ -21,10 +22,12 @@ export class PngDocumentDiffView implements vscode.CustomDocument {
     }
   }
 
-  get pngPromise(): Thenable<PNG> {
+  get pngPromise(): Thenable<Maybe<PNG>> {
     if (!this._pngPromise) {
       this._pngPromise = this.data.then((buffer) =>
-        PNG.sync.read(Buffer.from(buffer)),
+        buffer.length === 0
+          ? { ok: false }
+          : { ok: true, t: PNG.sync.read(Buffer.from(buffer)) },
       );
     }
     return this._pngPromise;

@@ -31,8 +31,8 @@ const features = {
 };
 
 function awaitPageLoad() {
-  return new Promise<void>(resolve => {
-    window.addEventListener('load', () => {
+  return new Promise<void>((resolve) => {
+    window.addEventListener("load", () => {
       resolve();
     });
   });
@@ -54,6 +54,20 @@ function showImage({ minScaleOne }: { minScaleOne: boolean }) {
 
   const scaleIndicator = document.getElementById("scale-indicator");
   assert(scaleIndicator);
+
+  const mainImage = document.getElementById("main-image");
+  assert(mainImage instanceof HTMLImageElement);
+  if (!mainImage.complete || mainImage.naturalHeight === 0) {
+    mainImage.style.display = "none";
+
+    const errorElement = document.getElementById("error");
+    const errorMessageElement = document.getElementById("error-message");
+
+    assert(errorElement && errorMessageElement);
+    errorElement.style.display = "grid";
+    errorMessageElement.innerText = "Image missing or failed to load";
+    return;
+  }
 
   const imageController = new ImageController({ minScaleOne });
 

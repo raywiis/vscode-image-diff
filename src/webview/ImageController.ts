@@ -35,7 +35,7 @@ export class ImageController extends EventTarget {
     const mainImage = document.getElementById("main-image");
     const diffImage = document.getElementById("diff-image");
 
-    assert(mainImage instanceof HTMLImageElement);
+    assert(mainImage instanceof HTMLImageElement && mainImage.complete);
     this.mainImage = mainImage;
 
     if (diffImage) {
