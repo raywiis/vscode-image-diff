@@ -64,6 +64,10 @@ function showImage({ minScaleOne }: { minScaleOne: boolean }) {
   let sync = true;
 
   if (imageController.hasDiff) {
+    document.body.classList.add('with-diff');
+  }
+
+  if (imageController.hasDiff) {
     const syncCheckbox = document.getElementById("sync-checkbox");
     const diffCheckbox = document.getElementById("diff-checkbox");
     assert(syncCheckbox && diffCheckbox);

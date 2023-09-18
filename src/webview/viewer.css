@@ -38,13 +38,16 @@ body {
 }
 
 #sync-checkbox,
-#diff-checkbox,
+#diff-checkbox {
+  display: none;
+}
+
 #diff-image {
   display: none;
 }
 
-#sync-checkbox,
-#diff-checkbox {
+.with-diff #sync-checkbox,
+.with-diff #diff-checkbox {
   display: inline-flex;
 }
 
