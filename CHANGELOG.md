@@ -4,6 +4,10 @@ All notable changes to the "image-diff" extension will be documented in this fil
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## 0.0.20
+
+Added a message if image fails to load or doesn't have any height
+
 ## 0.0.19
 
 Fix issue with webview often failing to initialize when reloading editor
