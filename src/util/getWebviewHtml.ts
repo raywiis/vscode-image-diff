@@ -108,7 +108,6 @@ export async function getWebviewHtml({
       </head>
       <body>
 
-        <div>${document.uri.toString()}</div>
         <img id="main-image" src="${paddedBase64Image ?? documentWebviewUri}" />
         ${
           diffUri
