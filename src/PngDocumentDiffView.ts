@@ -4,9 +4,9 @@ import * as vscode from "vscode";
 export class PngDocumentDiffView implements vscode.CustomDocument {
   private disposeEmitter = new vscode.EventEmitter<void>();
   private newWebviewEmitter = new vscode.EventEmitter<vscode.WebviewPanel>();
+  private _pngPromise?: Thenable<PNG>;
   public onWebviewOpen = this.newWebviewEmitter.event;
   public onDispose = this.disposeEmitter.event;
-  _pngPromise?: Thenable<PNG>;
   data: Thenable<Uint8Array>;
 
   constructor(

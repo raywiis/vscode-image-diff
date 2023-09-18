@@ -72,6 +72,9 @@ export class ImageDiffViewer
   ): Promise<void> {
     this.registerOpenDocument(document, webviewPanel);
     const [diffTarget, diffWebview] = await this.imageLinker.findLink(document);
+    if (token.isCancellationRequested) {
+      return;
+    }
 
     const getRootUri = (uri: vscode.Uri) => {
       const dirPath = dirname(uri.path);
@@ -121,6 +124,9 @@ export class ImageDiffViewer
       context: this.context,
       selectedAlignment: initialSelectedAlignment,
     });
+    if (token.isCancellationRequested) {
+      return;
+    }
     let otherView = diffWebview;
     document.onWebviewOpen((newPanel) => {
       otherView = newPanel;

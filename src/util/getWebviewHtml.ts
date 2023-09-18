@@ -83,13 +83,9 @@ export async function getWebviewHtml({
   const scriptUri = webview.asWebviewUri(
     vscode.Uri.joinPath(context.extensionUri, "out", "webview", "viewer.js"),
   );
-  const styleUri = vscode.Uri.joinPath(
-    context.extensionUri,
-    "out",
-    "webview",
-    "viewer.css",
+  const styleUri = webview.asWebviewUri(
+    vscode.Uri.joinPath(context.extensionUri, "out", "webview", "viewer.css"),
   );
-  const styleWebviewUri = panel.webview.asWebviewUri(styleUri);
   const documentWebviewUri = panel.webview.asWebviewUri(document.uri);
 
   return /* html */ `
@@ -108,7 +104,7 @@ export async function getWebviewHtml({
         >
         <title>Image diff</title>
         <link href="${codiconsUri}" rel="stylesheet"/>
-        <link href="${styleWebviewUri}" rel="stylesheet"/>
+        <link href="${styleUri}" rel="stylesheet"/>
       </head>
       <body>
 
