@@ -10,6 +10,46 @@ import {
 import { getDiff } from "./getDiff";
 import { PNG } from "pngjs";
 
+function generateDiffData(a: PNG, b: PNG, alignment: AlignmentOption) {
+  const mutualWidth = Math.max(a.width, b.width);
+  const mutualHeight = Math.max(a.height, b.height);
+
+  if (a.width === b.width && a.height === b.height) {
+    const diff = getDiff(a, b);
+
+    return {
+      diffUri: diff.diffUri,
+      diffPixelCount: diff.diffPixelCount,
+    } as const;
+  }
+
+  const [verticalAlign, horizontalAlign] = alignment.split(
+    "-",
+  ) as [VerticalAlign, HorizontalAlign];
+  const paddedA = padImage(
+    mutualWidth,
+    mutualHeight,
+    a,
+    verticalAlign,
+    horizontalAlign,
+  );
+  const paddedB = padImage(
+    mutualWidth,
+    mutualHeight,
+    b,
+    verticalAlign,
+    horizontalAlign,
+  );
+  const diff = getDiff(paddedA, paddedB);
+  return {
+    diffUri: diff.diffUri,
+    diffPixelCount: diff.diffPixelCount,
+    paddedBase64Image: `data:image/png;base64, ${PNG.sync
+      .write(paddedB)
+      .toString("base64")}`,
+  } as const;
+}
+
 export type GetWebviewHtmlArgs = {
   panel: vscode.WebviewPanel;
   document: PngDocumentDiffView;
@@ -36,46 +76,13 @@ export async function getWebviewHtml({
     ),
   );
 
-  let diffUri: string | undefined = undefined;
-  let diffPixelCount: number | undefined = undefined;
-  let paddedBase64Image: string | undefined = undefined;
+  let diffResults: ReturnType<typeof generateDiffData> | undefined;
   if (diffTarget) {
     try {
       const aPng = await diffTarget.pngPromise;
       const bPng = await document.pngPromise;
 
-      const mutualWidth = Math.max(aPng.width, bPng.width);
-      const mutualHeight = Math.max(aPng.height, bPng.height);
-
-      if (aPng.width === bPng.width && aPng.height === bPng.height) {
-        const res = getDiff(aPng, bPng);
-        diffUri = res.diffUri;
-        diffPixelCount = res.diffPixelCount;
-      } else {
-        const [verticalAlign, horizontalAlign] = selectedAlignment.split(
-          "-",
-        ) as [VerticalAlign, HorizontalAlign];
-        const paddedA = padImage(
-          mutualWidth,
-          mutualHeight,
-          aPng,
-          verticalAlign,
-          horizontalAlign,
-        );
-        const paddedB = padImage(
-          mutualWidth,
-          mutualHeight,
-          bPng,
-          verticalAlign,
-          horizontalAlign,
-        );
-        const res = getDiff(paddedA, paddedB);
-        diffUri = res.diffUri;
-        diffPixelCount = res.diffPixelCount;
-        paddedBase64Image = `data:image/png;base64, ${PNG.sync
-          .write(paddedB)
-          .toString("base64")}`;
-      }
+      diffResults = generateDiffData(aPng, bPng, selectedAlignment);
     } catch (err) {
       console.error(err);
     }
@@ -108,11 +115,11 @@ export async function getWebviewHtml({
       </head>
       <body>
 
-        <img id="main-image" src="${paddedBase64Image ?? documentWebviewUri}" />
+        <img id="main-image" src="${diffResults?.paddedBase64Image ?? documentWebviewUri}" />
         ${
-          diffUri
+          diffResults
             ? /* html */ `
-          <img id="diff-image" src="${diffUri}"/>
+          <img id="diff-image" src="${diffResults.diffUri}"/>
         `
             : ""
         }
@@ -125,7 +132,7 @@ export async function getWebviewHtml({
             <vscode-checkbox id="diff-checkbox">Diff</vscode-checkbox>
           </div>
           ${
-            paddedBase64Image
+            diffResults?.paddedBase64Image
               ? /* html */ `
             <div class="dropdown-container">
               <vscode-dropdown id="alignment-dropdown">
@@ -145,10 +152,10 @@ export async function getWebviewHtml({
               : ""
           }
           ${
-            diffPixelCount === undefined
+            diffResults === undefined
               ? ""
               : /*html*/ `
-              <div>${diffPixelCount} different pixels</div>
+              <div>${diffResults.diffPixelCount} different pixels</div>
             `
           }
             <div id="control-spacer"></div>

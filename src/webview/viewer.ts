@@ -30,6 +30,14 @@ const features = {
   reportTransform: false,
 };
 
+function awaitPageLoad() {
+  return new Promise<void>(resolve => {
+    window.addEventListener('load', () => {
+      resolve();
+    });
+  });
+}
+
 function showImage({ minScaleOne }: { minScaleOne: boolean }) {
   bootstrapVSCodeDesignSystem();
 
@@ -64,7 +72,7 @@ function showImage({ minScaleOne }: { minScaleOne: boolean }) {
   let sync = true;
 
   if (imageController.hasDiff) {
-    document.body.classList.add('with-diff');
+    document.body.classList.add("with-diff");
   }
 
   if (imageController.hasDiff) {
@@ -131,4 +139,6 @@ window.addEventListener(
   },
 );
 
-sendMessageToHost({ type: "ready" });
+awaitPageLoad().then(() => {
+  sendMessageToHost({ type: "ready" });
+});
