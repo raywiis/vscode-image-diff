@@ -4,6 +4,10 @@ All notable changes to the "image-diff" extension will be documented in this fil
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## 0.0.21
+
+Fix error icon being constantly shown
+
 ## 0.0.20
 
 Added a message if image fails to load or doesn't have any height
