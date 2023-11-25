@@ -4,6 +4,10 @@ All notable changes to the "image-diff" extension will be documented in this fil
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## 0.0.22
+
+Bump dependency versions, mostly dev & build stuff
+
 ## 0.0.21
 
 Fix error icon being constantly shown

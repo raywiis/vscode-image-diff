@@ -2,12 +2,12 @@
   "name": "png-image-diff",
   "displayName": "png-image-diff",
   "description": "Quickly view differences in images when diffing",
-  "version": "0.0.21",
+  "version": "0.0.22",
   "publisher": "raywiis",
   "icon": "marketplace-icon.png",
   "license": "MIT",
   "engines": {
-    "vscode": "^1.74.0"
+    "vscode": "^1.84.2"
   },
   "repository": {
     "type": "git",
@@ -16,9 +16,6 @@
   "categories": [
     "Other",
     "Visualization"
-  ],
-  "activationEvents": [
-    "onCustomEditor:image-diff.image-with-diff"
   ],
   "main": "./out/extension.js",
   "contributes": {
@@ -111,29 +108,29 @@
     "types:watch": "tsc --watch"
   },
   "devDependencies": {
-    "@types/glob": "^8.0.0",
-    "@types/mocha": "^10.0.1",
-    "@types/node": "16.x",
-    "@types/pixelmatch": "^5.2.4",
-    "@types/vscode": "^1.74.0",
-    "@typescript-eslint/eslint-plugin": "^5.45.0",
-    "@typescript-eslint/parser": "^5.45.0",
-    "@vscode/test-electron": "^2.2.0",
-    "@vscode/vsce": "^2.21.0",
-    "esbuild": "^0.17.5",
-    "eslint": "^8.28.0",
-    "fast-check": "^3.13.0",
-    "glob": "^8.0.3",
-    "mocha": "^10.1.0",
-    "prettier": "^3.0.2",
-    "typescript": "^4.9.3"
+    "@types/glob": "^8.1.0",
+    "@types/mocha": "^10.0.6",
+    "@types/node": "^20.10.0",
+    "@types/pixelmatch": "^5.2.6",
+    "@types/vscode": "^1.84.2",
+    "@typescript-eslint/eslint-plugin": "^6.12.0",
+    "@typescript-eslint/parser": "^6.12.0",
+    "@vscode/test-electron": "^2.3.8",
+    "@vscode/vsce": "^2.22.0",
+    "esbuild": "^0.19.7",
+    "eslint": "^8.54.0",
+    "fast-check": "^3.14.0",
+    "glob": "^10.3.10",
+    "mocha": "^10.2.0",
+    "prettier": "^3.1.0",
+    "typescript": "^5.3.2"
   },
   "dependencies": {
-    "@types/pngjs": "^6.0.1",
-    "@vscode/codicons": "^0.0.32",
-    "@vscode/webview-ui-toolkit": "^1.2.1",
+    "@types/pngjs": "^6.0.4",
+    "@vscode/codicons": "^0.0.35",
+    "@vscode/webview-ui-toolkit": "^1.3.1",
     "pixelmatch": "^5.3.0",
-    "pngjs": "^6.0.0"
+    "pngjs": "^7.0.0"
   },
   "vsce": {
     "dependencies": false
