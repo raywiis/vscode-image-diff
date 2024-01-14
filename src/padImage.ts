@@ -27,8 +27,8 @@ function getTopPadding(
   return verticalAlign === "top"
     ? 0
     : verticalAlign === "middle"
-    ? Math.floor((desiredHeight - actualHeight) / 2)
-    : desiredHeight - actualHeight;
+      ? Math.floor((desiredHeight - actualHeight) / 2)
+      : desiredHeight - actualHeight;
 }
 
 function getLeftPadding(
@@ -39,8 +39,8 @@ function getLeftPadding(
   return horizontalAlign === "left"
     ? 0
     : horizontalAlign === "center"
-    ? Math.floor((desiredWidth - actualWidth) / 2)
-    : desiredWidth - actualWidth;
+      ? Math.floor((desiredWidth - actualWidth) / 2)
+      : desiredWidth - actualWidth;
 }
 
 export function padImage(

@@ -1,8 +1,11 @@
 import * as path from "path";
 import Mocha from "mocha";
-import {  globSync } from "glob";
+import { globSync } from "glob";
 
-export function run(_: string, callback: (error: unknown, failures?: number) => void) {
+export function run(
+  _: string,
+  callback: (error: unknown, failures?: number) => void,
+) {
   const mocha = new Mocha({
     ui: "tdd",
     color: true,
@@ -21,7 +24,7 @@ export function run(_: string, callback: (error: unknown, failures?: number) => 
         callback(null);
       }
     });
-  } catch(err) {
+  } catch (err) {
     callback(err);
   }
 }
