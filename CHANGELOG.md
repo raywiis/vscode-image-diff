@@ -4,6 +4,10 @@ All notable changes to the "image-diff" extension will be documented in this fil
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## 0.0.24
+
+Add option to show diff by default
+
 ## 0.0.23
 
 Bump dependency versions

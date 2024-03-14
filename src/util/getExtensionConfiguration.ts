@@ -7,9 +7,11 @@ export function getExtensionConfiguration() {
     "diff.defaultAlignment",
     "top-left",
   );
+  const showDiffByDefault = configuration.get('viewer.showDiffByDefault', false);
   const minScaleOne = configuration.get("viewer.minScaleOne", false);
   return {
     initialSelectedAlignment,
+    showDiffByDefault,
     minScaleOne,
   };
 }

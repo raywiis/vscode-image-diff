@@ -6,6 +6,7 @@ export type ShowImageMessage = {
   };
   options: {
     minScaleOne: boolean;
+    showDiffByDefault: boolean;
   };
 };
 

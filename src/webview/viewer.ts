@@ -1,4 +1,4 @@
-import { HostToWebviewMessages } from "./shared";
+import { HostToWebviewMessages, ShowImageMessage } from "./shared";
 import "./viewer.css";
 import {
   Checkbox,
@@ -38,7 +38,7 @@ function awaitPageLoad() {
   });
 }
 
-function showImage({ minScaleOne }: { minScaleOne: boolean }) {
+function showImage({ minScaleOne, showDiffByDefault }: ShowImageMessage['options']) {
   bootstrapVSCodeDesignSystem();
 
   const alignmentDropdown = document.getElementById("alignment-dropdown");
@@ -106,6 +106,13 @@ function showImage({ minScaleOne }: { minScaleOne: boolean }) {
       const showDiff = event.target.checked;
       imageController.setDiffView(showDiff);
     });
+  }
+
+  if (imageController.hasDiff && showDiffByDefault) {
+    const diffCheckbox = document.getElementById("diff-checkbox");
+    assert(diffCheckbox && diffCheckbox instanceof Checkbox);
+    diffCheckbox.checked = true;
+    imageController.setDiffView(true);
   }
 
   return {

@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { HostToWebviewMessages, WebviewToHostMessages } from "./webview/shared";
+import { EnableTransformReport, HostToWebviewMessages, ShowImageMessage, TransformWebviewMessage, WebviewToHostMessages } from "./webview/shared";
 import { dirname } from "node:path";
 import { isGithubPRExtensionUri } from "./isGithubPRExtensionUri";
 import { PngDocumentDiffView } from "./PngDocumentDiffView";
@@ -134,25 +134,27 @@ export class ImageDiffViewer
     webviewPanel.webview.onDidReceiveMessage(
       async (message: WebviewToHostMessages) => {
         if (message.type === "ready") {
+          const config = getExtensionConfiguration();
           webviewPanel.webview.postMessage({
             type: "show_image",
             options: {
-              minScaleOne: getExtensionConfiguration().minScaleOne,
+              minScaleOne: config.minScaleOne,
+              showDiffByDefault: config.showDiffByDefault
             },
-          });
-          webviewPanel.webview.postMessage({ type: "enable_transform_report" });
+          } as ShowImageMessage);
+          webviewPanel.webview.postMessage({ type: "enable_transform_report" } as EnableTransformReport);
           diffTarget?.registerNewWebview(webviewPanel);
           if (diffWebview) {
             diffWebview.webview.postMessage({
               type: "enable_transform_report",
-            });
+            } as EnableTransformReport);
           }
         } else if (message.type === "transform") {
           if (otherView) {
             otherView.webview.postMessage({
               type: "transform",
               data: message.data,
-            });
+            } as TransformWebviewMessage);
           }
         } else if (message.type === "change_align") {
           webviewPanel.webview.html = await getWebviewHtml({
