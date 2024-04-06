@@ -38,7 +38,7 @@ function awaitPageLoad() {
   });
 }
 
-function showImage({ minScaleOne, showDiffByDefault }: ShowImageMessage['options']) {
+function showImage({ minScaleOne, showDiffByDefault, imageRendering }: ShowImageMessage['options']) {
   bootstrapVSCodeDesignSystem();
 
   const alignmentDropdown = document.getElementById("alignment-dropdown");
@@ -69,7 +69,7 @@ function showImage({ minScaleOne, showDiffByDefault }: ShowImageMessage['options
     return;
   }
 
-  const imageController = new ImageController({ minScaleOne });
+  const imageController = new ImageController({ minScaleOne, imageRendering });
 
   imageController.addEventListener("transform", (event) => {
     assert(event instanceof TransformEvent);

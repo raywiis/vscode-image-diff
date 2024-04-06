@@ -9,8 +9,11 @@ export function getExtensionConfiguration() {
   );
   const showDiffByDefault = configuration.get('viewer.showDiffByDefault', false);
   const minScaleOne = configuration.get("viewer.minScaleOne", false);
+  const imageRendering = configuration.get('viewer.imageRendering', "auto");
+
   return {
     initialSelectedAlignment,
+    imageRendering,
     showDiffByDefault,
     minScaleOne,
   };

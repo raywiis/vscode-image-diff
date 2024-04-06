@@ -7,6 +7,7 @@ export type ShowImageMessage = {
   options: {
     minScaleOne: boolean;
     showDiffByDefault: boolean;
+    imageRendering: 'auto' | 'pixelated';
   };
 };
 

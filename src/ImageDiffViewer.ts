@@ -139,7 +139,8 @@ export class ImageDiffViewer
             type: "show_image",
             options: {
               minScaleOne: config.minScaleOne,
-              showDiffByDefault: config.showDiffByDefault
+              showDiffByDefault: config.showDiffByDefault,
+              imageRendering: config.imageRendering,
             },
           } as ShowImageMessage);
           webviewPanel.webview.postMessage({ type: "enable_transform_report" } as EnableTransformReport);

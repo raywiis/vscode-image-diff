@@ -21,6 +21,7 @@ Replaces the built in image viewer for png images.
 ## Extension Settings
 
 - `image-diff.viewer.minScaleOne` - Will always have 1 or less as the minimum scale
+- `image-diff.viewer.imageRendering` - Sets the `image-rendering` css property on the image
 - `image-diff.diff.defaultAlign` - Sets the default diff alignment for images with different dimensions.
 
 ## Known Issues
@@ -30,3 +31,10 @@ Replaces the built in image viewer for png images.
 ## Release Notes
 
 Not 'released' yet. Check changelog for changes.
+
+## Contribution
+
+This extension was started from the
+[VS Code Extension Generator](https://www.npmjs.com/package/generator-code)
+And it's set up to be started the same as the basic extension outlined in the
+[getting started guide for vscode](https://code.visualstudio.com/api/get-started/your-first-extension)

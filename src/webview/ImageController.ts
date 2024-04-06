@@ -30,7 +30,7 @@ export class ImageController extends EventTarget {
   hasDiff = false;
   inDiff = false;
 
-  constructor(options: { minScaleOne: boolean }) {
+  constructor(options: { minScaleOne: boolean, imageRendering: 'auto' | 'pixelated' }) {
     super();
     const mainImage = document.getElementById("main-image");
     const diffImage = document.getElementById("diff-image");
@@ -41,6 +41,11 @@ export class ImageController extends EventTarget {
     if (diffImage) {
       assert(diffImage instanceof HTMLImageElement);
       this.diffImage = diffImage;
+    }
+
+    this.mainImage.style.imageRendering = options.imageRendering;
+    if (this.diffImage) {
+      this.diffImage.style.imageRendering = options.imageRendering;
     }
 
     const minWidthScale = window.innerWidth / mainImage.naturalWidth;

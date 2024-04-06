@@ -2,7 +2,7 @@
   "name": "png-image-diff",
   "displayName": "png-image-diff",
   "description": "Quickly view differences in images when diffing",
-  "version": "0.0.24",
+  "version": "0.0.25",
   "publisher": "raywiis",
   "icon": "marketplace-icon.png",
   "license": "MIT",
@@ -61,6 +61,16 @@
           "type": "boolean",
           "default": false,
           "markdownDescription": "Always have at least 1 as the minimum scale.\n\n> Might be useful if your images are smaller than your viewport"
+        },
+        "image-diff.viewer.imageRendering": {
+          "order": 1,
+          "type": "string",
+          "default": "auto",
+          "enum": [
+            "auto",
+            "pixelated"
+          ],
+          "markdownDescription": "Changes the css `image-rendering` property.\n\n > Useful if you often pixel peep"
         },
         "image-diff.viewer.showDiffByDefault": {
           "order": 10,
