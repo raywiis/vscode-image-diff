@@ -4,6 +4,10 @@ All notable changes to the "image-diff" extension will be documented in this fil
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## 0.0.26
+
+WIP swipe mode support
+
 ## 0.0.25
 
 Add an option to change the image-rendering property of the viewer

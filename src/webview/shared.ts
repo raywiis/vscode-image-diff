@@ -7,7 +7,7 @@ export type ShowImageMessage = {
   options: {
     minScaleOne: boolean;
     showDiffByDefault: boolean;
-    imageRendering: 'auto' | 'pixelated';
+    imageRendering: "auto" | "pixelated";
   };
 };
 
@@ -38,13 +38,35 @@ export type ToggleDiffMessage = {
   type: "toggle_diff";
 };
 
+export type ToggleSwipeForOriginalMessage = {
+  type: "toggle_swipe_original";
+};
+
+export type ToggleSwipeForChangedMessage = {
+  type: "toggle_swipe_changed";
+};
+
+export type OffsetXYMessage = {
+  type: "offset_xy";
+  data: { dx: number; dy: number };
+};
+
+export type WebviewDimensionReport = {
+  type: "original_swipe_adjustment";
+  data: { width: number; height: number };
+};
+
 export type HostToWebviewMessages =
   | ShowImageMessage
   | TransformWebviewMessage
   | ToggleDiffMessage
+  | ToggleSwipeForOriginalMessage
+  | ToggleSwipeForChangedMessage
+  | OffsetXYMessage
   | EnableTransformReport;
 
 export type WebviewToHostMessages =
   | WebviewReadyMessage
   | WebviewTransformMessage
+  | WebviewDimensionReport
   | WebviewChangeDiffAlignMessage;

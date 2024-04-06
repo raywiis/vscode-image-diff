@@ -1,4 +1,8 @@
-import { HostToWebviewMessages, ShowImageMessage } from "./shared";
+import {
+  HostToWebviewMessages,
+  OffsetXYMessage,
+  ShowImageMessage,
+} from "./shared";
 import "./viewer.css";
 import {
   Checkbox,
@@ -28,7 +32,16 @@ function bootstrapVSCodeDesignSystem() {
 
 const features = {
   reportTransform: false,
+  reportViewportChanges: false,
 };
+
+function reportViewportChanges() {
+  const width = window.innerWidth;
+  sendMessageToHost({
+    type: "original_swipe_adjustment",
+    data: { height: 0, width: -width },
+  });
+}
 
 function awaitPageLoad() {
   return new Promise<void>((resolve) => {
@@ -38,7 +51,11 @@ function awaitPageLoad() {
   });
 }
 
-function showImage({ minScaleOne, showDiffByDefault, imageRendering }: ShowImageMessage['options']) {
+function showImage({
+  minScaleOne,
+  showDiffByDefault,
+  imageRendering,
+}: ShowImageMessage["options"]) {
   bootstrapVSCodeDesignSystem();
 
   const alignmentDropdown = document.getElementById("alignment-dropdown");
@@ -123,10 +140,22 @@ function showImage({ minScaleOne, showDiffByDefault, imageRendering }: ShowImage
     setDiffView: (show: boolean) => {
       imageController.setDiffView(show);
     },
+    offsetXY: (offsets: OffsetXYMessage["data"]) => {
+      imageController.setOffsets(offsets);
+    },
+    setViewportReporting: (enabled: boolean) => {
+      if (enabled) {
+        reportViewportChanges();
+        window.addEventListener("resize", reportViewportChanges);
+      } else {
+        window.removeEventListener("resize", reportViewportChanges);
+      }
+    },
   };
 }
 
 let imageApi: ReturnType<typeof showImage> | undefined;
+let isInSwipe = false;
 window.addEventListener(
   "message",
   (message: MessageEvent<HostToWebviewMessages>) => {
@@ -143,7 +172,7 @@ window.addEventListener(
         message.data.data.y,
         message.data.data.scale,
       );
-    } else if ((message.data.type = "toggle_diff")) {
+    } else if (message.data.type === "toggle_diff") {
       try {
         const diffCheckbox = document.getElementById("diff-checkbox");
         if (diffCheckbox instanceof Checkbox) {
@@ -154,8 +183,21 @@ window.addEventListener(
       } catch (error) {
         console.error(error);
       }
+    } else if (message.data.type === "toggle_swipe_original") {
+      // TODO: Change default and maybe even allowable zoom levels
+      features.reportViewportChanges = !features.reportViewportChanges;
+      imageApi?.setViewportReporting(features.reportViewportChanges);
+    } else if (message.data.type === "toggle_swipe_changed") {
+      isInSwipe = !isInSwipe;
+      if (!isInSwipe) {
+        imageApi?.offsetXY({ dx: 0, dy: 0 });
+      }
+      // TODO: Report viewport to correct zoom levels on original
+    } else if (message.data.type === "offset_xy") {
+      imageApi?.offsetXY(message.data.data);
     } else {
-      throw new Error("Unsupported message");
+      // @ts-expect-error
+      throw new Error("Unsupported message: " + message.data.type);
     }
   },
 );

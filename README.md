@@ -12,10 +12,11 @@ Replaces the built in image viewer for png images.
 ## Commands
 
 - **Toggle diff mask** - Should toggle the diff mask in the active diff view.
+- **Toggle swipe mode** - Should toggle between a stacked swipe viewing mode.
 
-  Note that the extension API doesn't allow to directly get the active webview
-  so detection is based on visibility state changes. Therefore it might be
-  sketchy.
+> Note that the extension API doesn't allow to directly get the active webview so
+> detection is based on visibility state changes. Therefore toggle commands might
+> be sketchy.
 
 
 ## Extension Settings
@@ -25,6 +26,9 @@ Replaces the built in image viewer for png images.
 - `image-diff.diff.defaultAlign` - Sets the default diff alignment for images with different dimensions.
 
 ## Known Issues
+
+- The swipe mode suffers from transform and scaling limits that don't allow for
+the images to pan naturally and isn't correct for the view
 
 > This extension is in very early days. And it's subject to change anytime.
 

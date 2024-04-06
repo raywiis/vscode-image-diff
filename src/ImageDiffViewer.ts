@@ -1,5 +1,14 @@
 import * as vscode from "vscode";
-import { EnableTransformReport, HostToWebviewMessages, ShowImageMessage, TransformWebviewMessage, WebviewToHostMessages } from "./webview/shared";
+import {
+  EnableTransformReport,
+  HostToWebviewMessages,
+  OffsetXYMessage,
+  ShowImageMessage,
+  ToggleSwipeForChangedMessage,
+  ToggleSwipeForOriginalMessage,
+  TransformWebviewMessage,
+  WebviewToHostMessages,
+} from "./webview/shared";
 import { dirname } from "node:path";
 import { isGithubPRExtensionUri } from "./isGithubPRExtensionUri";
 import { PngDocumentDiffView } from "./PngDocumentDiffView";
@@ -27,6 +36,7 @@ export class ImageDiffViewer
   imageLinker = new ImageLinker();
 
   lastActiveDiffPanel: vscode.WebviewPanel | undefined;
+  lastActiveNonDiffPanel: vscode.WebviewPanel | undefined;
 
   constructor(private context: vscode.ExtensionContext) {
     context.extensionUri;
@@ -48,6 +58,23 @@ export class ImageDiffViewer
     }
   }
 
+  toggleActivePanelsSwipe() {
+    if (!this.lastActiveDiffPanel || !this.lastActiveNonDiffPanel) {
+      return;
+    }
+
+    const originalViewMessage: ToggleSwipeForOriginalMessage = {
+      type: "toggle_swipe_original",
+    };
+
+    const changedViewMessage: ToggleSwipeForChangedMessage = {
+      type: "toggle_swipe_changed",
+    };
+
+    this.lastActiveDiffPanel.webview.postMessage(originalViewMessage);
+    this.lastActiveNonDiffPanel.webview.postMessage(changedViewMessage);
+  }
+
   private registerOpenDocument(
     document: PngDocumentDiffView,
     webviewPanel: vscode.WebviewPanel,
@@ -60,6 +87,8 @@ export class ImageDiffViewer
     if (document.uri.scheme === "git" || isGithubPRExtensionUri(document.uri)) {
       /** Assuming last resolved panel is the last active one */
       this.lastActiveDiffPanel = webviewPanel;
+    } else {
+      this.lastActiveNonDiffPanel = webviewPanel;
     }
 
     this.imageLinker.addDocumentAndPanel(document, webviewPanel);
@@ -101,14 +130,18 @@ export class ImageDiffViewer
       if (
         !(document.uri.scheme === "git" || isGithubPRExtensionUri(document.uri))
       ) {
-        return;
+        this.lastActiveNonDiffPanel = webviewPanel;
+      } else {
+        this.lastActiveDiffPanel = webviewPanel;
       }
-      this.lastActiveDiffPanel = webviewPanel;
     });
 
     webviewPanel.onDidDispose(() => {
       if (this.lastActiveDiffPanel === webviewPanel) {
         this.lastActiveDiffPanel = undefined;
+      }
+      if (this.lastActiveNonDiffPanel === webviewPanel) {
+        this.lastActiveNonDiffPanel = undefined;
       }
     });
 
@@ -143,7 +176,9 @@ export class ImageDiffViewer
               imageRendering: config.imageRendering,
             },
           } as ShowImageMessage);
-          webviewPanel.webview.postMessage({ type: "enable_transform_report" } as EnableTransformReport);
+          webviewPanel.webview.postMessage({
+            type: "enable_transform_report",
+          } as EnableTransformReport);
           diffTarget?.registerNewWebview(webviewPanel);
           if (diffWebview) {
             diffWebview.webview.postMessage({
@@ -165,10 +200,17 @@ export class ImageDiffViewer
             context: this.context,
             selectedAlignment: message.data as AlignmentOption,
           });
+        } else if (message.type === "original_swipe_adjustment") {
+          if (otherView) {
+            const otherMessage: OffsetXYMessage = {
+              type: "offset_xy",
+              data: { dx: message.data.width, dy: message.data.height },
+            };
+            otherView.webview.postMessage(otherMessage);
+          }
         } else {
           // @ts-expect-error
-          message.type;
-          throw new Error("Unsupported message");
+          throw new Error("Unsupported message: " + message.type);
         }
       },
     );

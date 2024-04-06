@@ -19,6 +19,9 @@ export function activate(context: vscode.ExtensionContext) {
     vscode.commands.registerCommand("image-diff.toggle-diff", () => {
       imageDiffViewerProvider.toggleActivePanelDiff();
     }),
+    vscode.commands.registerCommand("image-diff.toggle-swipe", () => {
+      imageDiffViewerProvider.toggleActivePanelsSwipe();
+    }),
   );
 }
 

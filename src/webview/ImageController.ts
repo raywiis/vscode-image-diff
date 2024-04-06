@@ -26,11 +26,15 @@ export class ImageController extends EventTarget {
   private initialY = 0;
   private dragStartX = 0;
   private dragStartY = 0;
+  private offsets: { dx: number; dy: number } = { dx: 0, dy: 0 };
 
   hasDiff = false;
   inDiff = false;
 
-  constructor(options: { minScaleOne: boolean, imageRendering: 'auto' | 'pixelated' }) {
+  constructor(options: {
+    minScaleOne: boolean;
+    imageRendering: "auto" | "pixelated";
+  }) {
     super();
     const mainImage = document.getElementById("main-image");
     const diffImage = document.getElementById("diff-image");
@@ -158,13 +162,18 @@ export class ImageController extends EventTarget {
     this.initialY = clamp(minY, maxY, y);
 
     this.scale = newScale;
-    this.shownImage.style.transform = `matrix(${this.scale}, 0, 0, ${this.scale}, ${this.initialX}, ${this.initialY})`;
+    this.shownImage.style.transform = `matrix(${this.scale}, 0, 0, ${this.scale}, ${this.initialX + this.offsets.dx}, ${this.initialY + this.offsets.dy})`;
 
     if (!silent) {
       this.dispatchEvent(
         new TransformEvent(this.initialX, this.initialY, this.scale),
       );
     }
+  }
+
+  setOffsets(offsets: { dx: number; dy: number }) {
+    this.offsets = offsets;
+    this.setTransform(this.initialX, this.initialY, this.scale, true);
   }
 }
 
