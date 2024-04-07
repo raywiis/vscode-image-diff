@@ -32,7 +32,8 @@
       {
         "command": "image-diff.toggle-diff",
         "title": "Toggle diff mask"
-      }, {
+      },
+      {
         "command": "image-diff.toggle-swipe",
         "title": "Toggle swipe mode (WIP)"
       }
@@ -117,7 +118,7 @@
     "build": "yarn types && yarn run pack:extension && yarn run pack:webview",
     "pretest": "yarn run build && yarn run lint",
     "test": "node ./esbuild.tests.mjs && node --enable-source-maps ./out/test/runTest.js ",
-    "lint": "eslint src --ext ts",
+    "lint": "eslint src",
     "fmt": "prettier --write src",
     "pack:extension": "node ./esbuild.extension.mjs",
     "pack:extension:watch": "node ./esbuild.extension.watch.mjs",
@@ -129,20 +130,20 @@
   "devDependencies": {
     "@types/glob": "^8.1.0",
     "@types/mocha": "^10.0.6",
-    "@types/node": "^20.11.0",
+    "@types/node": "^20.12.5",
     "@types/pixelmatch": "^5.2.6",
-    "@types/vscode": "^1.85.0",
-    "@typescript-eslint/eslint-plugin": "^6.18.1",
-    "@typescript-eslint/parser": "^6.18.1",
-    "@vscode/test-electron": "^2.3.8",
-    "@vscode/vsce": "^2.23.0",
-    "esbuild": "^0.19.11",
-    "eslint": "^8.56.0",
-    "fast-check": "^3.15.0",
-    "glob": "^10.3.10",
-    "mocha": "^10.3.0",
-    "prettier": "^3.2.2",
-    "typescript": "^5.3.3"
+    "@types/vscode": "^1.88.0",
+    "@typescript-eslint/eslint-plugin": "^7.5.0",
+    "@typescript-eslint/parser": "^7.5.0",
+    "@vscode/test-electron": "^2.3.9",
+    "@vscode/vsce": "^2.24.0",
+    "esbuild": "^0.20.2",
+    "eslint": "^9.0.0",
+    "fast-check": "^3.17.1",
+    "glob": "^10.3.12",
+    "mocha": "^10.4.0",
+    "prettier": "^3.2.5",
+    "typescript": "^5.4.4"
   },
   "dependencies": {
     "@types/pngjs": "^6.0.4",
