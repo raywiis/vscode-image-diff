@@ -4,6 +4,10 @@ All notable changes to the "image-diff" extension will be documented in this fil
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## 0.0.27
+
+Remove boundaries when in swipe mode to make it more usable
+
 ## 0.0.26
 
 WIP swipe mode support

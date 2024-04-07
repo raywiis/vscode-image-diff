@@ -27,6 +27,7 @@ export class ImageController extends EventTarget {
   private dragStartX = 0;
   private dragStartY = 0;
   private offsets: { dx: number; dy: number } = { dx: 0, dy: 0 };
+  private boundConfig: BoundConfig = { type: 'contain-image' };
 
   hasDiff = false;
   inDiff = false;
@@ -153,11 +154,9 @@ export class ImageController extends EventTarget {
     const onScreenWidth = this.shownImage.clientWidth * newScale;
     const onScreenHeight = this.shownImage.clientHeight * newScale;
 
-    const minX = Math.min(0, window.innerWidth - onScreenWidth);
-    const maxX = Math.max(0, window.innerWidth - onScreenWidth);
-    const minY = Math.min(0, window.innerHeight - onScreenHeight);
-    const maxY = Math.max(0, window.innerHeight - onScreenHeight);
+    const [minX, maxX, minY, maxY] = getBounds(this.boundConfig, [onScreenWidth, onScreenHeight]);
 
+    console.log({ x, y });
     this.initialX = clamp(minX, maxX, x);
     this.initialY = clamp(minY, maxY, y);
 
@@ -171,9 +170,41 @@ export class ImageController extends EventTarget {
     }
   }
 
+  resizeBounds(bounds: BoundConfig) {
+    this.boundConfig = bounds;
+    this.setTransform(this.initialX, this.initialY, this.scale, true);
+  }
+
   setOffsets(offsets: { dx: number; dy: number }) {
     this.offsets = offsets;
     this.setTransform(this.initialX, this.initialY, this.scale, true);
+  }
+}
+
+type Bound = [minX: number, maxX: number, minY: number, maxY: number];
+export type BoundConfig = 
+  | { type: 'contain-image' }
+  | {type: 'none'}
+
+const noneBounds: Bound = [
+  -Infinity,
+  Infinity,
+  -Infinity,
+  Infinity
+];
+
+function getBounds(config: BoundConfig, imageSize: [width: number, height: number]): Bound {
+  if (config.type === 'contain-image') {
+    const minX = Math.min(0, window.innerWidth - imageSize[0]);
+    const maxX = Math.max(0, window.innerWidth - imageSize[0]);
+    const minY = Math.min(0, window.innerHeight - imageSize[1]);
+    const maxY = Math.max(0, window.innerHeight - imageSize[1]);
+    return [minX, maxX, minY, maxY];
+  } else if (config.type === "none") {
+    return noneBounds;
+  } else {
+    // @ts-expect-error
+    throw new Error('unknown bound config: ' + config.type);
   }
 }
 

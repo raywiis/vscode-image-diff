@@ -16,7 +16,7 @@ import {
   vsCodeOption,
 } from "@vscode/webview-ui-toolkit";
 import { sendMessageToHost } from "./vsCodeApi";
-import { ImageController, TransformEvent } from "./ImageController";
+import { BoundConfig, ImageController, TransformEvent } from "./ImageController";
 import { assert } from "./assert";
 
 function bootstrapVSCodeDesignSystem() {
@@ -143,6 +143,9 @@ function showImage({
     offsetXY: (offsets: OffsetXYMessage["data"]) => {
       imageController.setOffsets(offsets);
     },
+    rebound: (bounds: BoundConfig) => {
+      imageController.resizeBounds(bounds);
+    },
     setViewportReporting: (enabled: boolean) => {
       if (enabled) {
         reportViewportChanges();
@@ -185,14 +188,22 @@ window.addEventListener(
       }
     } else if (message.data.type === "toggle_swipe_original") {
       // TODO: Change default and maybe even allowable zoom levels
+      isInSwipe = !isInSwipe;
       features.reportViewportChanges = !features.reportViewportChanges;
       imageApi?.setViewportReporting(features.reportViewportChanges);
+      if (isInSwipe) {
+        imageApi?.rebound({ type: 'none' });
+      } else {
+        imageApi?.rebound({ type: 'contain-image' });
+      }
     } else if (message.data.type === "toggle_swipe_changed") {
       isInSwipe = !isInSwipe;
       if (!isInSwipe) {
         imageApi?.offsetXY({ dx: 0, dy: 0 });
+        imageApi?.rebound({ type: 'contain-image' });
+      } else {
+        imageApi?.rebound({ type:'none'});
       }
-      // TODO: Report viewport to correct zoom levels on original
     } else if (message.data.type === "offset_xy") {
       imageApi?.offsetXY(message.data.data);
     } else {
