@@ -27,7 +27,7 @@ export class ImageController extends EventTarget {
   private dragStartX = 0;
   private dragStartY = 0;
   private offsets: { dx: number; dy: number } = { dx: 0, dy: 0 };
-  private boundConfig: BoundConfig = { type: 'contain-image' };
+  private boundConfig: BoundConfig = { type: "contain-image" };
 
   hasDiff = false;
   inDiff = false;
@@ -154,9 +154,11 @@ export class ImageController extends EventTarget {
     const onScreenWidth = this.shownImage.clientWidth * newScale;
     const onScreenHeight = this.shownImage.clientHeight * newScale;
 
-    const [minX, maxX, minY, maxY] = getBounds(this.boundConfig, [onScreenWidth, onScreenHeight]);
+    const [minX, maxX, minY, maxY] = getBounds(this.boundConfig, [
+      onScreenWidth,
+      onScreenHeight,
+    ]);
 
-    console.log({ x, y });
     this.initialX = clamp(minX, maxX, x);
     this.initialY = clamp(minY, maxY, y);
 
@@ -182,19 +184,15 @@ export class ImageController extends EventTarget {
 }
 
 type Bound = [minX: number, maxX: number, minY: number, maxY: number];
-export type BoundConfig = 
-  | { type: 'contain-image' }
-  | {type: 'none'}
+export type BoundConfig = { type: "contain-image" } | { type: "none" };
 
-const noneBounds: Bound = [
-  -Infinity,
-  Infinity,
-  -Infinity,
-  Infinity
-];
+const noneBounds: Bound = [-Infinity, Infinity, -Infinity, Infinity];
 
-function getBounds(config: BoundConfig, imageSize: [width: number, height: number]): Bound {
-  if (config.type === 'contain-image') {
+function getBounds(
+  config: BoundConfig,
+  imageSize: [width: number, height: number],
+): Bound {
+  if (config.type === "contain-image") {
     const minX = Math.min(0, window.innerWidth - imageSize[0]);
     const maxX = Math.max(0, window.innerWidth - imageSize[0]);
     const minY = Math.min(0, window.innerHeight - imageSize[1]);
@@ -204,7 +202,7 @@ function getBounds(config: BoundConfig, imageSize: [width: number, height: numbe
     return noneBounds;
   } else {
     // @ts-expect-error
-    throw new Error('unknown bound config: ' + config.type);
+    throw new Error("unknown bound config: " + config.type);
   }
 }
 
