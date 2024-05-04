@@ -12,5 +12,6 @@
   "cSpell.words": [
     "codicon",
     "pngjs"
-  ]
+  ],
+  "cmake.configureOnOpen": false
 }
