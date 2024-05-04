@@ -1,18 +1,9 @@
-import tsParser from '@typescript-eslint/parser';
-import tsPlugin from '@typescript-eslint/eslint-plugin'
+// @ts-check
 
-export default [{
-  "files": ['src/**/*.ts'],
-  "languageOptions": {
-    "parser": tsParser
-  },
-  "plugins": { "typescript": tsPlugin },
-  "rules": {
-    "typescript/naming-convention": "warn",
-    "typescript/semi": "warn",
-    "curly": "warn",
-    "eqeqeq": "warn",
-    "no-throw-literal": "warn",
-    "semi": "off"
-  },
-}]
+import eslint from '@eslint/js';
+import tseslint from 'typescript-eslint';
+
+export default tseslint.config(
+  eslint.configs.recommended,
+  ...tseslint.configs.recommended,
+)

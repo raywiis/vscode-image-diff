@@ -211,7 +211,7 @@ window.addEventListener(
     } else if (message.data.type === "offset_xy") {
       imageApi?.offsetXY(message.data.data);
     } else {
-      // @ts-expect-error
+      // @ts-expect-error Ensures we always handle all messages
       throw new Error("Unsupported message: " + message.data.type);
     }
   },

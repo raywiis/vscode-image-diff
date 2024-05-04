@@ -201,7 +201,7 @@ function getBounds(
   } else if (config.type === "none") {
     return noneBounds;
   } else {
-    // @ts-expect-error
+    // @ts-expect-error Ensures we handle all configs
     throw new Error("unknown bound config: " + config.type);
   }
 }

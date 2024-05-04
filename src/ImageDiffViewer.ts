@@ -45,7 +45,6 @@ export class ImageDiffViewer
   openCustomDocument(
     uri: vscode.Uri,
     openContext: vscode.CustomDocumentOpenContext,
-    token: vscode.CancellationToken,
   ): PngDocumentDiffView {
     return new PngDocumentDiffView(uri, openContext.untitledDocumentData);
   }
@@ -209,7 +208,7 @@ export class ImageDiffViewer
             otherView.webview.postMessage(otherMessage);
           }
         } else {
-          // @ts-expect-error
+          // @ts-expect-error Makes sure we always handle messages
           throw new Error("Unsupported message: " + message.type);
         }
       },
