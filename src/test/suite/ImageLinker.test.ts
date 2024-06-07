@@ -6,6 +6,7 @@ import { beforeEach, suite, test } from "mocha";
 import fc from "fast-check";
 
 suite("ImageLinker", () => {
+  // TODO: Get various OS path and filename restrictions to filter arbitraries
   let imageLinker = new ImageLinker();
 
   beforeEach(() => {
@@ -24,15 +25,19 @@ suite("ImageLinker", () => {
       }),
     );
 
-  test(`Should match basic git uris`, async () => {
+  test(`Should match a file and git uri`, async () => {
     const property = fc.asyncProperty(
-      fc.string({ minLength: 1 }),
-      fc.string({ minLength: 1 }),
-      async (username, filename) => {
+      fc.record({
+        username: fc.string({ minLength: 1 }),
+        filename: fc.string({ minLength: 1 }),
+      }).map(({ filename, username }) => {
         const filepath = getUnixFilePath(username, filename);
         const gitParam = getGitQueryString(filepath, "~");
         const a = `file://${filepath}`;
         const b = `git:${filepath}?${gitParam}`;
+        return { a, b, filename };
+      }),
+      async ({ a, b, filename }) => {
         const uriA = vscode.Uri.parse(a);
         const uriB = vscode.Uri.parse(b);
         const documentA = new PngDocumentDiffView(uriA, new Uint8Array());
@@ -55,11 +60,12 @@ suite("ImageLinker", () => {
     await fc.assert(property);
   });
 
-  test(`Should match two git uris`, async () => {
+  test(`Should match two git uris when one has a HEAD ref (staged)`, async () => {
+    const forbiddenSymbolRegex = /(#|\?)/
     const property = fc.asyncProperty(
       fc.record({
-        username: fc.string({ minLength: 1 }),
-        filename: fc.string({ minLength: 1 }),
+        username: fc.string({ minLength: 1 }).filter(s => !forbiddenSymbolRegex.test(s)),
+        filename: fc.string({ minLength: 1 }).filter(s => !forbiddenSymbolRegex.test(s)),
       }).map(({ username, filename }) => {
         const filepath = getWindowsFilePath(username, filename);
         const gitQueryA = getGitQueryString(filepath, "");
@@ -71,7 +77,6 @@ suite("ImageLinker", () => {
       async ({ a, b, filename }) => {
         const uriA = vscode.Uri.parse(a);
         const uriB = vscode.Uri.parse(b);
-        debugger;
         const documentA = new PngDocumentDiffView(uriA, new Uint8Array());
         const documentB = new PngDocumentDiffView(uriB, new Uint8Array());
         const webviewPanel = vscode.window.createWebviewPanel(
@@ -89,9 +94,6 @@ suite("ImageLinker", () => {
       },
     );
 
-    await fc.assert(property, 
-
-{ seed: 1056987564, path: "0:0:0:0:0", endOnFailure: true }
-    );
+    await fc.assert(property);
   });
 });
