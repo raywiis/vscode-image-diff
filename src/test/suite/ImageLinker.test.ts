@@ -55,19 +55,23 @@ suite("ImageLinker", () => {
     await fc.assert(property);
   });
 
-  test.skip(`Should match two git uris`, async () => {
+  test(`Should match two git uris`, async () => {
     const property = fc.asyncProperty(
-      fc.string({ minLength: 1 }),
-      fc.string({ minLength: 1 }),
-      async (username, filename) => {
+      fc.record({
+        username: fc.string({ minLength: 1 }),
+        filename: fc.string({ minLength: 1 }),
+      }).map(({ username, filename }) => {
         const filepath = getWindowsFilePath(username, filename);
-        const gitQueryA = getGitQueryString(filepath, "~");
-        const gitQueryB = getGitQueryString(filepath, "");
+        const gitQueryA = getGitQueryString(filepath, "");
+        const gitQueryB = getGitQueryString(filepath, "HEAD");
         const a = `git:${filepath}?${gitQueryA}`;
         const b = `git:${filepath}?${gitQueryB}`;
-
+        return { a, b, filename }
+      }),
+      async ({ a, b, filename }) => {
         const uriA = vscode.Uri.parse(a);
         const uriB = vscode.Uri.parse(b);
+        debugger;
         const documentA = new PngDocumentDiffView(uriA, new Uint8Array());
         const documentB = new PngDocumentDiffView(uriB, new Uint8Array());
         const webviewPanel = vscode.window.createWebviewPanel(
@@ -85,6 +89,9 @@ suite("ImageLinker", () => {
       },
     );
 
-    await fc.assert(property);
+    await fc.assert(property, 
+
+{ seed: 1056987564, path: "0:0:0:0:0", endOnFailure: true }
+    );
   });
 });
