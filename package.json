@@ -2,12 +2,12 @@
   "name": "png-image-diff",
   "displayName": "png-image-diff",
   "description": "Quickly view differences in images when diffing",
-  "version": "0.0.28",
+  "version": "0.0.29",
   "publisher": "raywiis",
   "icon": "marketplace-icon.png",
   "license": "MIT",
   "engines": {
-    "vscode": "^1.88.0"
+    "vscode": "^1.90.0"
   },
   "repository": {
     "type": "git",
