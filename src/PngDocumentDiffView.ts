@@ -1,4 +1,4 @@
-import { PNG } from "pngjs";
+import { PNG } from "pngjs/browser";
 import * as vscode from "vscode";
 import { Maybe } from "./util/maybe";
 

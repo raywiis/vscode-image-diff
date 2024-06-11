@@ -8,7 +8,7 @@ import {
   padImage,
 } from "../padImage";
 import { getDiff } from "./getDiff";
-import { PNG } from "pngjs";
+import { PNG } from "pngjs/browser";
 
 function generateDiffData(a: PNG, b: PNG, alignment: AlignmentOption) {
   const mutualWidth = Math.max(a.width, b.width);

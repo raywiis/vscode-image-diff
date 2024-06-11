@@ -1,12 +1,13 @@
 import { Uri, workspace } from "vscode";
 import { GITHUB_PR_EXTENSION_STRING } from "./constants";
-import { relative, sep } from "node:path";
 import { isGithubPRExtensionUri } from "./isGithubPRExtensionUri";
+
+const sep = '/'
 
 export function getRelPath(uri: Uri): string | undefined {
   const workspaceFolder = workspace.getWorkspaceFolder(uri);
   if (uri.scheme === "file" && workspaceFolder) {
-    const relativePath = relative(workspaceFolder.uri.path, uri.path);
+    const relativePath = workspace.asRelativePath(uri.path)
     return relativePath;
   }
   if (isGithubPRExtensionUri(uri)) {

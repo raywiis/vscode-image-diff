@@ -4,6 +4,11 @@ All notable changes to the "image-diff" extension will be documented in this fil
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## 0.0.30
+
+Enable Web extension
+Some changes to support the extension web version
+
 ## 0.0.29
 
 Fix issue with not matching staged files

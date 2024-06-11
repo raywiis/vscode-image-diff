@@ -1,5 +1,5 @@
-import assert = require("assert");
-import { PNG } from "pngjs";
+import { assert } from './util/assert';
+import { PNG } from "pngjs/browser";
 
 export type VerticalAlign = "top" | "middle" | "bottom";
 

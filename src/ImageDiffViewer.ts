@@ -9,7 +9,6 @@ import {
   TransformWebviewMessage,
   WebviewToHostMessages,
 } from "./webview/shared";
-import { dirname } from "node:path";
 import { isGithubPRExtensionUri } from "./isGithubPRExtensionUri";
 import { PngDocumentDiffView } from "./PngDocumentDiffView";
 import { ImageLinker } from "./ImageLinker";
@@ -102,6 +101,13 @@ export class ImageDiffViewer
     const [diffTarget, diffWebview] = await this.imageLinker.findLink(document);
     if (token.isCancellationRequested) {
       return;
+    }
+
+    const dirname = (path: string) => {
+      const sep = '/';
+      const parts = path.split(sep);
+      parts.pop();
+      return parts.join(sep)
     }
 
     const getRootUri = (uri: vscode.Uri) => {

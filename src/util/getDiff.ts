@@ -1,6 +1,6 @@
-import assert = require("assert");
-import pixelMatch = require("pixelmatch");
-import { PNG } from "pngjs";
+import { assert } from '../util/assert';
+import pixelMatch from 'pixelmatch'
+import { PNG } from "pngjs/browser";
 
 export function getDiff(aPng: PNG, bPng: PNG) {
   assert(aPng.width === bPng.width && aPng.height === bPng.height);
