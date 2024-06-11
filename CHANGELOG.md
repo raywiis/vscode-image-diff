@@ -4,6 +4,11 @@ All notable changes to the "image-diff" extension will be documented in this fil
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## 0.0.32
+
+Add new command `Diff last opened images` for working around images failing to
+link...
+
 ## 0.0.31
 
 Add `draggable="false"` to image html so that the web extension works with dnd

@@ -13,6 +13,9 @@ Replaces the built in image viewer for png images.
 
 - **Toggle diff mask** - Should toggle the diff mask in the active diff view.
 - **Toggle swipe mode** - Should toggle between a stacked swipe viewing mode.
+- **Diff last opened images** - Will force link last two opened webviews.
+  If vscode opens a diff and your images aren't linked with diff and sync then
+  this is the workaround.
 
 > Note that the extension API doesn't allow to directly get the active webview so
 > detection is based on visibility state changes. Therefore toggle commands might

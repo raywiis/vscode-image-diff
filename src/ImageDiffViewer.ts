@@ -15,6 +15,7 @@ import { ImageLinker } from "./ImageLinker";
 import { AlignmentOption } from "./padImage";
 import { getWebviewHtml } from "./util/getWebviewHtml";
 import { getExtensionConfiguration } from "./util/getExtensionConfiguration";
+import { DocumentOpeningHistory } from "./DocumentOpeningHistory";
 
 export class ImageDiffViewer
   implements vscode.CustomReadonlyEditorProvider<PngDocumentDiffView>
@@ -27,12 +28,13 @@ export class ImageDiffViewer
       provider,
       {
         supportsMultipleEditorsPerDocument: false,
-      },
+      }
     );
     return { registration, provider };
   }
 
   imageLinker = new ImageLinker();
+  documentHistory = new DocumentOpeningHistory();
 
   lastActiveDiffPanel: vscode.WebviewPanel | undefined;
   lastActiveNonDiffPanel: vscode.WebviewPanel | undefined;
@@ -43,7 +45,7 @@ export class ImageDiffViewer
 
   openCustomDocument(
     uri: vscode.Uri,
-    openContext: vscode.CustomDocumentOpenContext,
+    openContext: vscode.CustomDocumentOpenContext
   ): PngDocumentDiffView {
     return new PngDocumentDiffView(uri, openContext.untitledDocumentData);
   }
@@ -75,8 +77,9 @@ export class ImageDiffViewer
 
   private registerOpenDocument(
     document: PngDocumentDiffView,
-    webviewPanel: vscode.WebviewPanel,
+    webviewPanel: vscode.WebviewPanel
   ) {
+    this.documentHistory.panelOpened(document, webviewPanel);
     const roots = vscode.workspace.workspaceFolders?.map((f) => f.uri.path);
     if (!roots) {
       return;
@@ -92,10 +95,26 @@ export class ImageDiffViewer
     this.imageLinker.addDocumentAndPanel(document, webviewPanel);
   }
 
+  diffLastPanels() {
+    const [a, b] = this.documentHistory.lastTwo;
+    if (!a || !b) {
+      vscode.window.showInformationMessage("Not enough open panels to diff");
+      return;
+    }
+
+    setupWebview({
+      context: this.context,
+      diffTarget: b[0],
+      diffWebview: b[1],
+      document: a[0],
+      webviewPanel: a[1],
+    })
+  }
+
   async resolveCustomEditor(
     document: PngDocumentDiffView,
     webviewPanel: vscode.WebviewPanel,
-    token: vscode.CancellationToken,
+    token: vscode.CancellationToken
   ): Promise<void> {
     this.registerOpenDocument(document, webviewPanel);
     const [diffTarget, diffWebview] = await this.imageLinker.findLink(document);
@@ -103,31 +122,7 @@ export class ImageDiffViewer
       return;
     }
 
-    const dirname = (path: string) => {
-      const sep = '/';
-      const parts = path.split(sep);
-      parts.pop();
-      return parts.join(sep)
-    }
-
-    const getRootUri = (uri: vscode.Uri) => {
-      const dirPath = dirname(uri.path);
-      const rootUri = uri.with({ path: dirPath });
-      return rootUri;
-    };
-
     webviewPanel.title = "This is shown to user?";
-    const localResourceRoots = [
-      getRootUri(document.uri),
-      vscode.Uri.joinPath(
-        this.context.extensionUri,
-        "node_modules",
-        "@vscode/codicons",
-        "dist",
-      ),
-      vscode.Uri.joinPath(this.context.extensionUri, "out", "webview"),
-    ];
-
     webviewPanel.onDidChangeViewState((event) => {
       if (!event.webviewPanel.active) {
         return;
@@ -150,74 +145,116 @@ export class ImageDiffViewer
       }
     });
 
-    webviewPanel.webview.options = {
-      enableScripts: true,
-      localResourceRoots,
-    };
-    const { initialSelectedAlignment } = getExtensionConfiguration();
-    webviewPanel.webview.html = await getWebviewHtml({
-      panel: webviewPanel,
+    setupWebview({
       document,
-      diffTarget,
+      webviewPanel,
       context: this.context,
-      selectedAlignment: initialSelectedAlignment,
+      diffTarget,
+      diffWebview,
     });
-    if (token.isCancellationRequested) {
-      return;
-    }
-    let otherView = diffWebview;
-    document.onWebviewOpen((newPanel) => {
-      otherView = newPanel;
-    });
-    webviewPanel.webview.onDidReceiveMessage(
-      async (message: WebviewToHostMessages) => {
-        if (message.type === "ready") {
-          const config = getExtensionConfiguration();
-          webviewPanel.webview.postMessage({
-            type: "show_image",
-            options: {
-              minScaleOne: config.minScaleOne,
-              showDiffByDefault: config.showDiffByDefault,
-              imageRendering: config.imageRendering,
-            },
-          } as ShowImageMessage);
-          webviewPanel.webview.postMessage({
-            type: "enable_transform_report",
-          } as EnableTransformReport);
-          diffTarget?.registerNewWebview(webviewPanel);
-          if (diffWebview) {
-            diffWebview.webview.postMessage({
-              type: "enable_transform_report",
-            } as EnableTransformReport);
-          }
-        } else if (message.type === "transform") {
-          if (otherView) {
-            otherView.webview.postMessage({
-              type: "transform",
-              data: message.data,
-            } as TransformWebviewMessage);
-          }
-        } else if (message.type === "change_align") {
-          webviewPanel.webview.html = await getWebviewHtml({
-            panel: webviewPanel,
-            document,
-            diffTarget,
-            context: this.context,
-            selectedAlignment: message.data as AlignmentOption,
-          });
-        } else if (message.type === "original_swipe_adjustment") {
-          if (otherView) {
-            const otherMessage: OffsetXYMessage = {
-              type: "offset_xy",
-              data: { dx: message.data.width, dy: message.data.height },
-            };
-            otherView.webview.postMessage(otherMessage);
-          }
-        } else {
-          // @ts-expect-error Makes sure we always handle messages
-          throw new Error("Unsupported message: " + message.type);
-        }
-      },
-    );
   }
 }
+
+const setupWebview = async ({
+  context,
+  diffTarget,
+  diffWebview,
+  document,
+  webviewPanel,
+}: {
+  document: PngDocumentDiffView;
+  webviewPanel: vscode.WebviewPanel;
+  context: vscode.ExtensionContext;
+  diffTarget: PngDocumentDiffView | undefined;
+  diffWebview: vscode.WebviewPanel | undefined;
+}) => {
+  const dirname = (path: string) => {
+    const sep = "/";
+    const parts = path.split(sep);
+    parts.pop();
+    return parts.join(sep);
+  };
+
+  const getRootUri = (uri: vscode.Uri) => {
+    const dirPath = dirname(uri.path);
+    const rootUri = uri.with({ path: dirPath });
+    return rootUri;
+  };
+
+  const localResourceRoots = [
+    getRootUri(document.uri),
+    vscode.Uri.joinPath(
+      context.extensionUri,
+      "node_modules",
+      "@vscode/codicons",
+      "dist"
+    ),
+    vscode.Uri.joinPath(context.extensionUri, "out", "webview"),
+  ];
+  webviewPanel.webview.options = {
+    enableScripts: true,
+    localResourceRoots,
+  };
+  const { initialSelectedAlignment } = getExtensionConfiguration();
+  webviewPanel.webview.html = await getWebviewHtml({
+    panel: webviewPanel,
+    document,
+    diffTarget,
+    context,
+    selectedAlignment: initialSelectedAlignment,
+  });
+  let otherView = diffWebview;
+  document.onWebviewOpen((newPanel) => {
+    otherView = newPanel;
+  });
+  webviewPanel.webview.onDidReceiveMessage(
+    async (message: WebviewToHostMessages) => {
+      if (message.type === "ready") {
+        const config = getExtensionConfiguration();
+        webviewPanel.webview.postMessage({
+          type: "show_image",
+          options: {
+            minScaleOne: config.minScaleOne,
+            showDiffByDefault: config.showDiffByDefault,
+            imageRendering: config.imageRendering,
+          },
+        } as ShowImageMessage);
+        webviewPanel.webview.postMessage({
+          type: "enable_transform_report",
+        } as EnableTransformReport);
+        diffTarget?.registerNewWebview(webviewPanel);
+        if (diffWebview) {
+          diffWebview.webview.postMessage({
+            type: "enable_transform_report",
+          } as EnableTransformReport);
+        }
+      } else if (message.type === "transform") {
+        if (otherView) {
+          otherView.webview.postMessage({
+            type: "transform",
+            data: message.data,
+          } as TransformWebviewMessage);
+        }
+      } else if (message.type === "change_align") {
+        webviewPanel.webview.html = await getWebviewHtml({
+          panel: webviewPanel,
+          document,
+          diffTarget,
+          context,
+          selectedAlignment: message.data as AlignmentOption,
+        });
+      } else if (message.type === "original_swipe_adjustment") {
+        if (otherView) {
+          const otherMessage: OffsetXYMessage = {
+            type: "offset_xy",
+            data: { dx: message.data.width, dy: message.data.height },
+          };
+          otherView.webview.postMessage(otherMessage);
+        }
+      } else {
+        // @ts-expect-error Makes sure we always handle messages
+        throw new Error("Unsupported message: " + message.type);
+      }
+    }
+  );
+};
