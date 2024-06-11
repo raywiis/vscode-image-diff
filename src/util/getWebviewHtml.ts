@@ -122,13 +122,13 @@ export async function getWebviewHtml({
           <span id="error-icon" class="codicon codicon-warning"></span>
           <div id="error-message"></div>
         </div>
-        <img id="main-image" src="${
+        <img id="main-image" draggable="false" src="${
           diffResults?.paddedBase64Image ?? documentWebviewUri
         }" />
         ${
           diffResults
             ? /* html */ `
-          <img id="diff-image" src="${diffResults.diffUri}"/>
+          <img id="diff-image" draggable="false" src="${diffResults.diffUri}"/>
         `
             : ""
         }
