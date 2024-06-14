@@ -1,5 +1,5 @@
-import { assert } from '../util/assert';
-import pixelMatch from 'pixelmatch'
+import { assert } from "../util/assert";
+import pixelMatch from "pixelmatch";
 import { PNG } from "pngjs/browser";
 
 export function getDiff(aPng: PNG, bPng: PNG) {

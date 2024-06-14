@@ -2,7 +2,7 @@
   "name": "png-image-diff",
   "displayName": "png-image-diff",
   "description": "Quickly view differences in images when diffing",
-  "version": "0.0.32",
+  "version": "0.0.33",
   "publisher": "raywiis",
   "icon": "marketplace-icon.png",
   "license": "MIT",
@@ -41,6 +41,10 @@
       {
         "command": "image-diff.diff-last-panels",
         "title": "Diff last opened images (WIP)"
+      },
+      {
+        "command": "image-diff.log-last-uris",
+        "title": "Developer: Log last open image URIs"
       }
     ],
     "keybindings": [

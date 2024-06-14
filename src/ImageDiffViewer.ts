@@ -17,6 +17,10 @@ import { getWebviewHtml } from "./util/getWebviewHtml";
 import { getExtensionConfiguration } from "./util/getExtensionConfiguration";
 import { DocumentOpeningHistory } from "./DocumentOpeningHistory";
 
+const outputChannel = vscode.window.createOutputChannel("Image diff logs", {
+  log: true,
+});
+
 export class ImageDiffViewer
   implements vscode.CustomReadonlyEditorProvider<PngDocumentDiffView>
 {
@@ -28,7 +32,7 @@ export class ImageDiffViewer
       provider,
       {
         supportsMultipleEditorsPerDocument: false,
-      }
+      },
     );
     return { registration, provider };
   }
@@ -45,7 +49,7 @@ export class ImageDiffViewer
 
   openCustomDocument(
     uri: vscode.Uri,
-    openContext: vscode.CustomDocumentOpenContext
+    openContext: vscode.CustomDocumentOpenContext,
   ): PngDocumentDiffView {
     return new PngDocumentDiffView(uri, openContext.untitledDocumentData);
   }
@@ -77,7 +81,7 @@ export class ImageDiffViewer
 
   private registerOpenDocument(
     document: PngDocumentDiffView,
-    webviewPanel: vscode.WebviewPanel
+    webviewPanel: vscode.WebviewPanel,
   ) {
     this.documentHistory.panelOpened(document, webviewPanel);
     const roots = vscode.workspace.workspaceFolders?.map((f) => f.uri.path);
@@ -95,6 +99,12 @@ export class ImageDiffViewer
     this.imageLinker.addDocumentAndPanel(document, webviewPanel);
   }
 
+  logLastPanels() {
+    const lastPanels = this.documentHistory.lastTwo;
+    const uris = lastPanels.map((p) => p?.[0].uri.toString());
+    outputChannel.appendLine(`last panel uris: ${uris.join("|")}`);
+  }
+
   diffLastPanels() {
     const [a, b] = this.documentHistory.lastTwo;
     if (!a || !b) {
@@ -108,13 +118,13 @@ export class ImageDiffViewer
       diffWebview: b[1],
       document: a[0],
       webviewPanel: a[1],
-    })
+    });
   }
 
   async resolveCustomEditor(
     document: PngDocumentDiffView,
     webviewPanel: vscode.WebviewPanel,
-    token: vscode.CancellationToken
+    token: vscode.CancellationToken,
   ): Promise<void> {
     this.registerOpenDocument(document, webviewPanel);
     const [diffTarget, diffWebview] = await this.imageLinker.findLink(document);
@@ -187,7 +197,7 @@ const setupWebview = async ({
       context.extensionUri,
       "node_modules",
       "@vscode/codicons",
-      "dist"
+      "dist",
     ),
     vscode.Uri.joinPath(context.extensionUri, "out", "webview"),
   ];
@@ -255,6 +265,6 @@ const setupWebview = async ({
         // @ts-expect-error Makes sure we always handle messages
         throw new Error("Unsupported message: " + message.type);
       }
-    }
+    },
   );
 };

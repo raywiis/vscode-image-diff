@@ -1,4 +1,4 @@
-import { assert } from './util/assert';
+import { assert } from "./util/assert";
 import { PNG } from "pngjs/browser";
 
 export type VerticalAlign = "top" | "middle" | "bottom";
