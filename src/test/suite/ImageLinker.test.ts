@@ -13,6 +13,12 @@ suite("ImageLinker", () => {
     imageLinker = new ImageLinker();
   });
 
+
+  const getDocumentFromUriString = (input: string): PngDocumentDiffView => {
+    const uri = vscode.Uri.parse(input);
+    const file = new PngDocumentDiffView(uri, new Uint8Array());
+    return file;
+  }
   const getUnixFilePath = (username: string, filename: string) =>
     `/home/${username}/repo/${filename}.png`;
   const getWindowsFilePath = (username: string, filename: string) =>
@@ -40,10 +46,8 @@ suite("ImageLinker", () => {
           return { a, b, filename };
         }),
       async ({ a, b, filename }) => {
-        const uriA = vscode.Uri.parse(a);
-        const uriB = vscode.Uri.parse(b);
-        const documentA = new PngDocumentDiffView(uriA, new Uint8Array());
-        const documentB = new PngDocumentDiffView(uriB, new Uint8Array());
+        const documentA = getDocumentFromUriString(a);
+        const documentB = getDocumentFromUriString(b);
         const webviewPanel = vscode.window.createWebviewPanel(
           "image-diff",
           filename,
@@ -88,10 +92,8 @@ suite("ImageLinker", () => {
           return { a, b, filename };
         }),
       async ({ a, b, filename }) => {
-        const uriA = vscode.Uri.parse(a);
-        const uriB = vscode.Uri.parse(b);
-        const documentA = new PngDocumentDiffView(uriA, new Uint8Array());
-        const documentB = new PngDocumentDiffView(uriB, new Uint8Array());
+        const documentA = getDocumentFromUriString(a);
+        const documentB = getDocumentFromUriString(b);
         const webviewPanel = vscode.window.createWebviewPanel(
           "image-diff",
           filename,
