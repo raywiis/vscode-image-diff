@@ -101,8 +101,23 @@ export class ImageDiffViewer
 
   logLastPanels() {
     const lastPanels = this.documentHistory.lastTwo;
-    const uris = lastPanels.map((p) => p?.[0].uri.toString());
-    outputChannel.appendLine(`last panel uris: ${uris.join("|")}`);
+    outputChannel.appendLine("last document uris:")
+    for (const panel of lastPanels) {
+      if (!panel) {
+        continue;
+      }
+      outputChannel.appendLine(panel?.[0].uri.toString());
+    }
+
+    const workspaceFolders = (vscode.workspace.workspaceFolders ?? []);
+    if (workspaceFolders.length === 0) {
+      outputChannel.appendLine("no workspace folders")
+    } else {
+      outputChannel.appendLine("workspace folder uris:")
+    }
+    for (const folder of (vscode.workspace.workspaceFolders ?? [])) {
+      outputChannel.appendLine(folder.uri.toString())
+    }
   }
 
   diffLastPanels() {

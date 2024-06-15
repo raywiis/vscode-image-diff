@@ -4,6 +4,10 @@ All notable changes to the "image-diff" extension will be documented in this fil
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## 0.0.34
+
+Change logs of last image uri command
+
 ## 0.0.33
 
 Add new command for development to log last open file uris `Developer: Log last open image URIs`
