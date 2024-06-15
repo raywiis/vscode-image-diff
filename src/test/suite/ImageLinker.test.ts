@@ -62,6 +62,11 @@ suite("ImageLinker", () => {
     await fc.assert(property);
   });
 
+  test.skip('Should match URIs when looking at a PR with github.dev', async () => {
+    // vscode-vfs://github%2B7b2276223a312c22726566223a7b2274797065223a332c226964223a2231227d7d/raywiis/png-image-diff-sample-repo/png-clipart-eiffel-tower-graphy-paris-world-tower.png
+    // vscode-userdata:/User/globalStorage/github.vscode-pull-request-github/temp/png-image-diff-sample-repo/png-clipart-eiffel-tower-graphy-paris-world-tower.png
+  })
+
   test(`Should match two git uris when one has a HEAD ref (staged)`, async () => {
     const forbiddenSymbolRegex = /(#|\?)/;
     const property = fc.asyncProperty(
