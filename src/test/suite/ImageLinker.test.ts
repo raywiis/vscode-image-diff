@@ -66,8 +66,45 @@ suite("ImageLinker", () => {
   });
 
   test.skip("Should match URIs when looking at a PR with github.dev", async () => {
-    // vscode-vfs://github%2B7b2276223a312c22726566223a7b2274797065223a332c226964223a2231227d7d/raywiis/png-image-diff-sample-repo/png-clipart-eiffel-tower-graphy-paris-world-tower.png
-    // vscode-userdata:/User/globalStorage/github.vscode-pull-request-github/temp/png-image-diff-sample-repo/png-clipart-eiffel-tower-graphy-paris-world-tower.png
+    const arbitrary = fc
+      .record({
+        username: fc.string(),
+        filename: fc.string(),
+      })
+      .map(({ username, filename }) => {
+        // vscode-vfs://github%2B7b2276223a312c22726566223a7b2274797065223a332c226964223a2231227d7d/raywiis/png-image-diff-sample-repo/png-clipart-eiffel-tower-graphy-paris-world-tower.png
+        // vscode-userdata:/User/globalStorage/github.vscode-pull-request-github/temp/png-image-diff-sample-repo/png-clipart-eiffel-tower-graphy-paris-world-tower.png
+        const githubData = { v: 1, ref: { type: 3, id: "1" } };
+        const githubDataHex = [...JSON.stringify(githubData)]
+          .map((c) => {
+            return c.charCodeAt(0).toString(16).padStart(2, "00").slice(-2);
+          })
+          .join("");
+        const githubDataUri = encodeURIComponent(`github+${githubDataHex}`);
+        const a = `vscode-vfs://${githubDataUri}/${username}/repo/${filename}.png`;
+        const b = `vscode-userdata:/User/globalStorage/github.vscode-pull-request-github/temp/repo${filename}.png`;
+        return { a, b, filename };
+      });
+
+    const property = fc.asyncProperty(arbitrary, async ({ a, b, filename }) => {
+      const documentA = getDocumentFromUriString(a);
+      const documentB = getDocumentFromUriString(b);
+      const webviewPanel = vscode.window.createWebviewPanel(
+        "image-diff",
+        filename,
+        vscode.ViewColumn.Active,
+      );
+
+      imageLinker.addDocumentAndPanel(documentA, webviewPanel);
+
+      const [foundDocument, foundWebview] =
+        await imageLinker.findLink(documentB);
+
+      assert.equal(foundDocument, documentA);
+      assert.equal(foundWebview, webviewPanel);
+    });
+
+    fc.assert(property);
   });
 
   test(`Should match two git uris when one has a HEAD ref (staged)`, async () => {
