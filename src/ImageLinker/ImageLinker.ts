@@ -1,10 +1,8 @@
 import { WebviewPanel } from "vscode";
 import { getRelPath } from "../getRelPath";
 import { PngDocumentDiffView } from "../PngDocumentDiffView";
-
-type LinkPackage =
-  | readonly [document: PngDocumentDiffView, webviewPanel: WebviewPanel]
-  | readonly [undefined, undefined];
+import { GithubDotDevStrategy } from "./GithubDotDevStrategy";
+import { LinkPackage, LinkStrategy } from "./LinkStrategy";
 
 const emptyLinkPackage: LinkPackage = [undefined, undefined];
 
@@ -48,10 +46,22 @@ export class ImageLinker {
   private pathLink = new Map<string, LinkPackage>();
   private relativePathLinkMap = new Map<string, LinkPackage>();
 
+  private strategies: LinkStrategy[] = [new GithubDotDevStrategy()];
+
+  private notifyStrategies(
+    document: PngDocumentDiffView,
+    webview: WebviewPanel,
+  ) {
+    for (const s of this.strategies) {
+      s.onDocumentOpen(document, webview);
+    }
+  }
+
   addDocumentAndPanel(
     document: PngDocumentDiffView,
     webviewPanel: WebviewPanel,
   ) {
+    this.notifyStrategies(document, webviewPanel);
     const path = document.uri.path;
     const relPath = getRelPath(document.uri);
 
@@ -74,11 +84,12 @@ export class ImageLinker {
   }
 
   async findLink(document: PngDocumentDiffView): Promise<LinkPackage> {
-    await new Promise<void>((r) =>
-      setTimeout(() => {
-        r();
-      }, 10),
-    );
+    const linkFromStrategies = await Promise.all(
+      this.strategies.map((s) => s.lookForLink(document)),
+    ).then((res) => res.find((linkPackage) => linkPackage[0] !== undefined));
+    if (linkFromStrategies) {
+      return linkFromStrategies;
+    }
     if (document.uri.scheme === "file") {
       return emptyLinkPackage;
     }

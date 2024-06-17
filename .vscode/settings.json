@@ -11,7 +11,8 @@
   "svg.preview.background": "white",
   "cSpell.words": [
     "codicon",
-    "pngjs"
+    "pngjs",
+    "userdata"
   ],
   "cmake.configureOnOpen": false
 }

@@ -65,11 +65,12 @@ suite("ImageLinker", () => {
     await fc.assert(property);
   });
 
-  test.skip("Should match URIs when looking at a PR with github.dev", async () => {
+  test("Should match URIs when looking at a PR with github.dev", async () => {
+    const forbiddenSymbolRegex = /(#|\?|\/)/;
     const arbitrary = fc
       .record({
-        username: fc.string(),
-        filename: fc.string(),
+        username: fc.string().filter((s) => !forbiddenSymbolRegex.test(s)),
+        filename: fc.string().filter((s) => !forbiddenSymbolRegex.test(s)),
       })
       .map(({ username, filename }) => {
         // vscode-vfs://github%2B7b2276223a312c22726566223a7b2274797065223a332c226964223a2231227d7d/raywiis/png-image-diff-sample-repo/png-clipart-eiffel-tower-graphy-paris-world-tower.png
@@ -82,7 +83,7 @@ suite("ImageLinker", () => {
           .join("");
         const githubDataUri = encodeURIComponent(`github+${githubDataHex}`);
         const a = `vscode-vfs://${githubDataUri}/${username}/repo/${filename}.png`;
-        const b = `vscode-userdata:/User/globalStorage/github.vscode-pull-request-github/temp/repo${filename}.png`;
+        const b = `vscode-userdata:/User/globalStorage/github.vscode-pull-request-github/temp/repo/${filename}.png`;
         return { a, b, filename };
       });
 
@@ -104,7 +105,10 @@ suite("ImageLinker", () => {
       assert.equal(foundWebview, webviewPanel);
     });
 
-    fc.assert(property);
+    await fc.assert(property, 
+  { seed: 67222879, path: "1:1:0:3", endOnFailure: true }
+
+    );
   });
 
   test(`Should match two git uris when one has a HEAD ref (staged)`, async () => {
