@@ -11,7 +11,7 @@ import {
 } from "./webview/shared";
 import { isGithubPRExtensionUri } from "./isGithubPRExtensionUri";
 import { PngDocumentDiffView } from "./PngDocumentDiffView";
-import { ImageLinker } from "./ImageLinker";
+import { ImageLinker } from "./ImageLinker/ImageLinker";
 import { AlignmentOption } from "./padImage";
 import { getWebviewHtml } from "./util/getWebviewHtml";
 import { getExtensionConfiguration } from "./util/getExtensionConfiguration";

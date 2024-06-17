@@ -1,6 +1,6 @@
 import { WebviewPanel } from "vscode";
-import { getRelPath } from "./getRelPath";
-import { PngDocumentDiffView } from "./PngDocumentDiffView";
+import { getRelPath } from "../getRelPath";
+import { PngDocumentDiffView } from "../PngDocumentDiffView";
 
 type LinkPackage =
   | readonly [document: PngDocumentDiffView, webviewPanel: WebviewPanel]

@@ -1,6 +1,6 @@
 import * as assert from "assert";
 import * as vscode from "vscode";
-import { ImageLinker } from "../../ImageLinker";
+import { ImageLinker } from "../../ImageLinker/ImageLinker";
 import { PngDocumentDiffView } from "../../PngDocumentDiffView";
 import { beforeEach, suite, test } from "mocha";
 import fc from "fast-check";
