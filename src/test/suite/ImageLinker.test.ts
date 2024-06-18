@@ -105,10 +105,7 @@ suite("ImageLinker", () => {
       assert.equal(foundWebview, webviewPanel);
     });
 
-    await fc.assert(property, 
-  { seed: 67222879, path: "1:1:0:3", endOnFailure: true }
-
-    );
+    await fc.assert(property);
   });
 
   test(`Should match two git uris when one has a HEAD ref (staged)`, async () => {

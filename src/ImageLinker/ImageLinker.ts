@@ -3,50 +3,19 @@ import { getRelPath } from "../getRelPath";
 import { PngDocumentDiffView } from "../PngDocumentDiffView";
 import { GithubDotDevStrategy } from "./GithubDotDevStrategy";
 import { LinkPackage, LinkStrategy } from "./LinkStrategy";
+import { StagedGitStrategy } from "./StagedGitStrategy";
 
 const emptyLinkPackage: LinkPackage = [undefined, undefined];
 
 const isFileDocument = (document: PngDocumentDiffView) => {
   return document.uri.scheme === "file";
 };
-type ParseGitQueryReturn =
-  | {
-      parsed: true;
-      query: { ref: string };
-    }
-  | {
-      parsed: false;
-      error: unknown;
-    };
-const parseGitQuery = (query: string): ParseGitQueryReturn => {
-  try {
-    const parsedQuery = JSON.parse(query);
-    if (typeof parsedQuery !== "object" || !("ref" in parsedQuery)) {
-      throw new Error("No ref in git query");
-    }
-    return { parsed: true, query: parsedQuery };
-  } catch (error) {
-    return { parsed: false, error };
-  }
-};
-const gitRefForLastVersion = "";
-const isStagedGitDocument = (document: PngDocumentDiffView) => {
-  if (document.uri.scheme !== "git") {
-    return false;
-  }
-  const parsedQuery = parseGitQuery(document.uri.query);
-  if (!parsedQuery.parsed) {
-    return false;
-  } else {
-    return parsedQuery.query.ref === gitRefForLastVersion;
-  }
-};
 
 export class ImageLinker {
   private pathLink = new Map<string, LinkPackage>();
   private relativePathLinkMap = new Map<string, LinkPackage>();
 
-  private strategies: LinkStrategy[] = [new GithubDotDevStrategy()];
+  private strategies: LinkStrategy[] = [new GithubDotDevStrategy(), new StagedGitStrategy()];
 
   private notifyStrategies(
     document: PngDocumentDiffView,
@@ -65,7 +34,7 @@ export class ImageLinker {
     const path = document.uri.path;
     const relPath = getRelPath(document.uri);
 
-    if (!isFileDocument(document) && !isStagedGitDocument(document)) {
+    if (!isFileDocument(document)) {
       return;
     }
 
@@ -94,10 +63,6 @@ export class ImageLinker {
       return emptyLinkPackage;
     }
     if (document.uri.scheme === "git") {
-      const gitQuery = parseGitQuery(document.uri.query);
-      if (gitQuery.parsed && gitQuery.query.ref === gitRefForLastVersion) {
-        return emptyLinkPackage;
-      }
       return this.pathLink.get(document.uri.path) ?? emptyLinkPackage;
     }
     const relPath = getRelPath(document.uri);

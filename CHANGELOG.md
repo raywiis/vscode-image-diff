@@ -4,6 +4,10 @@ All notable changes to the "image-diff" extension will be documented in this fil
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## 0.0.36
+
+Move staged git file link strategy into it's own file
+
 ## 0.0.35
 
 Linker changes and attempt a strategy to link github.dev files
