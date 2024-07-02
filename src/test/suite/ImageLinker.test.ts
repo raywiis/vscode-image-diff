@@ -30,6 +30,23 @@ suite("ImageLinker", () => {
       }),
     );
 
+  const assertUrisLink = async (a: string, b: string, filename: string) => {
+    const documentA = getDocumentFromUriString(a);
+    const documentB = getDocumentFromUriString(b);
+    const webviewPanel = vscode.window.createWebviewPanel(
+      "image-diff",
+      filename,
+      vscode.ViewColumn.Active,
+    );
+
+    imageLinker.addDocumentAndPanel(documentA, webviewPanel);
+    const [foundDocument, foundWebview] =
+      await imageLinker.findLink(documentB);
+
+    assert.equal(foundDocument, documentA);
+    assert.equal(foundWebview, webviewPanel);
+  }
+
   test(`Should match a file and git uri`, async () => {
     const property = fc.asyncProperty(
       fc
@@ -45,20 +62,7 @@ suite("ImageLinker", () => {
           return { a, b, filename };
         }),
       async ({ a, b, filename }) => {
-        const documentA = getDocumentFromUriString(a);
-        const documentB = getDocumentFromUriString(b);
-        const webviewPanel = vscode.window.createWebviewPanel(
-          "image-diff",
-          filename,
-          vscode.ViewColumn.Active,
-        );
-
-        imageLinker.addDocumentAndPanel(documentA, webviewPanel);
-        const [foundDocument, foundWebview] =
-          await imageLinker.findLink(documentB);
-
-        assert.equal(foundDocument, documentA);
-        assert.equal(foundWebview, webviewPanel);
+        await assertUrisLink(a, b, filename);
       },
     );
 
@@ -88,21 +92,7 @@ suite("ImageLinker", () => {
       });
 
     const property = fc.asyncProperty(arbitrary, async ({ a, b, filename }) => {
-      const documentA = getDocumentFromUriString(a);
-      const documentB = getDocumentFromUriString(b);
-      const webviewPanel = vscode.window.createWebviewPanel(
-        "image-diff",
-        filename,
-        vscode.ViewColumn.Active,
-      );
-
-      imageLinker.addDocumentAndPanel(documentA, webviewPanel);
-
-      const [foundDocument, foundWebview] =
-        await imageLinker.findLink(documentB);
-
-      assert.equal(foundDocument, documentA);
-      assert.equal(foundWebview, webviewPanel);
+      await assertUrisLink(a, b, filename);
     });
 
     await fc.assert(property);
@@ -129,20 +119,7 @@ suite("ImageLinker", () => {
           return { a, b, filename };
         }),
       async ({ a, b, filename }) => {
-        const documentA = getDocumentFromUriString(a);
-        const documentB = getDocumentFromUriString(b);
-        const webviewPanel = vscode.window.createWebviewPanel(
-          "image-diff",
-          filename,
-          vscode.ViewColumn.Active,
-        );
-
-        imageLinker.addDocumentAndPanel(documentA, webviewPanel);
-        const [foundDocument, foundWebview] =
-          await imageLinker.findLink(documentB);
-
-        assert.equal(foundDocument, documentA);
-        assert.equal(foundWebview, webviewPanel);
+        await assertUrisLink(a, b, filename);
       },
     );
 
