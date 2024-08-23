@@ -59,8 +59,8 @@ export class StagedGitStrategy implements LinkStrategy {
   }
 
   async lookForLink(document: PngDocumentDiffView): Promise<LinkPackage> {
-    await new Promise(r => setTimeout(r, 10));
-    if (document.uri.scheme !== 'git') {
+    await new Promise((r) => setTimeout(r, 10));
+    if (document.uri.scheme !== "git") {
       return [undefined, undefined];
     }
     const gitQuery = parseGitQuery(document.uri.query);

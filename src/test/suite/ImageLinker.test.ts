@@ -40,12 +40,11 @@ suite("ImageLinker", () => {
     );
 
     imageLinker.addDocumentAndPanel(documentA, webviewPanel);
-    const [foundDocument, foundWebview] =
-      await imageLinker.findLink(documentB);
+    const [foundDocument, foundWebview] = await imageLinker.findLink(documentB);
 
     assert.equal(foundDocument, documentA);
     assert.equal(foundWebview, webviewPanel);
-  }
+  };
 
   test(`Should match a file and git uri`, async () => {
     const property = fc.asyncProperty(
@@ -67,6 +66,16 @@ suite("ImageLinker", () => {
     );
 
     await fc.assert(property);
+  });
+
+  /**
+   * https://github.com/microsoft/vscode-pull-request-github/issues/6156
+   */
+  test("should match (broken?) github PR plugin with workspaces in use", async () => {
+    const a = "file:///home/uname/unshared_dirname/shared_dirname/filename.png";
+    const b =
+      "vscode-userdata:/home/uname/.config/Code/User/globalStorage/github.vscode-pull-request-github/temp/unshared_dirname/shared_dirname/filename.png";
+    await assertUrisLink(a, b, "test");
   });
 
   test("Should match URIs when looking at a PR with github.dev", async () => {

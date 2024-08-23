@@ -4,6 +4,7 @@ import { PngDocumentDiffView } from "../PngDocumentDiffView";
 import { GithubDotDevStrategy } from "./GithubDotDevStrategy";
 import { LinkPackage, LinkStrategy } from "./LinkStrategy";
 import { StagedGitStrategy } from "./StagedGitStrategy";
+import { GithubPRExtensionStrategy } from "./GithubPRExtensionStrategy";
 
 const emptyLinkPackage: LinkPackage = [undefined, undefined];
 
@@ -15,7 +16,11 @@ export class ImageLinker {
   private pathLink = new Map<string, LinkPackage>();
   private relativePathLinkMap = new Map<string, LinkPackage>();
 
-  private strategies: LinkStrategy[] = [new GithubDotDevStrategy(), new StagedGitStrategy()];
+  private strategies: LinkStrategy[] = [
+    new GithubDotDevStrategy(),
+    new StagedGitStrategy(),
+    new GithubPRExtensionStrategy(),
+  ];
 
   private notifyStrategies(
     document: PngDocumentDiffView,
