@@ -8,19 +8,21 @@ import {
   padImage,
 } from "../padImage";
 import { getDiff } from "./getDiff";
-import { PNG } from "pngjs/browser";
+import { JimpClass } from "@jimp/types";
 
-function generateDiffData(a: PNG, b: PNG, alignment: AlignmentOption) {
-  const mutualWidth = Math.max(a.width, b.width);
-  const mutualHeight = Math.max(a.height, b.height);
+function generateDiffData(a: JimpClass, b: JimpClass, alignment: AlignmentOption) {
+const mutualWidth = Math.max(a.bitmap.width, b.bitmap.width);
+  const mutualHeight = Math.max(a.bitmap.height, b.bitmap.height);
 
-  if (a.width === b.width && a.height === b.height) {
+  if (a.bitmap.width === b.bitmap.width && a.bitmap.height === b.bitmap.height) {
     const diff = getDiff(a, b);
-
-    return {
-      diffUri: diff.diffUri,
-      diffPixelCount: diff.diffPixelCount,
-    } as const;
+    return diff.then((diff) => {
+      return {
+        diffUri: diff.diffUri,
+        diffPixelCount: diff.diffPixelCount,
+        paddedBase64Image: null,
+      } as const;
+    });
   }
 
   const [verticalAlign, horizontalAlign] = alignment.split("-") as [
@@ -42,13 +44,13 @@ function generateDiffData(a: PNG, b: PNG, alignment: AlignmentOption) {
     horizontalAlign,
   );
   const diff = getDiff(paddedA, paddedB);
-  return {
-    diffUri: diff.diffUri,
-    diffPixelCount: diff.diffPixelCount,
-    paddedBase64Image: `data:image/png;base64, ${PNG.sync
-      .write(paddedB)
-      .toString("base64")}`,
-  } as const;
+  return diff.then((diff) => {
+    return {
+      diffUri: diff.diffUri,
+      diffPixelCount: diff.diffPixelCount,
+      paddedBase64Image: `data:image/png;base64, ${paddedB.getBase64("image/png")}`,
+    } as const;
+  });
 }
 
 export type GetWebviewHtmlArgs = {
@@ -99,6 +101,8 @@ export async function getWebviewHtml({
   );
   const documentWebviewUri = panel.webview.asWebviewUri(document.uri);
 
+  const diffResults2 = await diffResults;
+
   return /* html */ `
     <!DOCTYPE html>
     <html lang="en">
@@ -123,12 +127,12 @@ export async function getWebviewHtml({
           <div id="error-message"></div>
         </div>
         <img id="main-image" draggable="false" src="${
-          diffResults?.paddedBase64Image ?? documentWebviewUri
+          diffResults2?.paddedBase64Image ?? documentWebviewUri
         }" />
         ${
-          diffResults
+          diffResults2
             ? /* html */ `
-          <img id="diff-image" draggable="false" src="${diffResults.diffUri}"/>
+          <img id="diff-image" draggable="false" src="${diffResults2.diffUri}"/>
         `
             : ""
         }
@@ -141,7 +145,7 @@ export async function getWebviewHtml({
             <vscode-checkbox id="diff-checkbox">Diff</vscode-checkbox>
           </div>
           ${
-            diffResults?.paddedBase64Image
+            diffResults2?.paddedBase64Image
               ? /* html */ `
             <div class="dropdown-container">
               <vscode-dropdown id="alignment-dropdown">
@@ -161,10 +165,10 @@ export async function getWebviewHtml({
               : ""
           }
           ${
-            diffResults === undefined
+            diffResults2 === undefined
               ? ""
               : /*html*/ `
-              <div>${diffResults.diffPixelCount} different pixels</div>
+              <div>${diffResults2.diffPixelCount} different pixels</div>
             `
           }
             <div id="control-spacer"></div>
