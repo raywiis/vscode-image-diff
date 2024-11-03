@@ -1,5 +1,6 @@
+import { JimpClass } from "@jimp/types";
 import { assert } from "./util/assert";
-import { PNG } from "pngjs/browser";
+import { Jimp } from "jimp";
 
 export type VerticalAlign = "top" | "middle" | "bottom";
 
@@ -46,15 +47,19 @@ function getLeftPadding(
 export function padImage(
   desiredWidth: number,
   desiredHeight: number,
-  image: PNG,
+  image: JimpClass,
   verticalAlign: VerticalAlign,
   horizontalAlign: HorizontalAlign,
 ) {
-  const actualWidth = image.width;
-  const actualHeight = image.height;
+  const actualWidth = image.bitmap.width;
+  const actualHeight = image.bitmap.height;
   assert(actualWidth <= desiredWidth && actualHeight <= desiredHeight);
 
-  const paddedImage = new PNG({ width: desiredWidth, height: desiredHeight });
+  const paddedImage = Jimp.fromBitmap({
+    data: Buffer.alloc(desiredWidth * desiredHeight * 4),
+    width: desiredWidth,
+    height: desiredHeight,
+  });
 
   const topPadding = getTopPadding(verticalAlign, actualHeight, desiredHeight);
   const leftPadding = getLeftPadding(
@@ -76,7 +81,7 @@ export function padImage(
       const destinationPixel = j + leftPadding;
       const paddedOffset = paddedRowOffset + destinationPixel * bytesPerPixel;
       const imageOffset = imageRowOffset + j * bytesPerPixel;
-      const pixel = image.data.readInt32LE(imageOffset);
+      const pixel = image.bitmap.data.readInt32LE(imageOffset);
       paddedImage.data.writeInt32LE(pixel, paddedOffset);
     }
   }

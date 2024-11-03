@@ -1,11 +1,12 @@
-import { PNG } from "pngjs/browser";
 import * as vscode from "vscode";
 import { Maybe } from "./util/maybe";
+import { Jimp } from "jimp";
+import { JimpClass } from "@jimp/types";
 
 export class PngDocumentDiffView implements vscode.CustomDocument {
   private disposeEmitter = new vscode.EventEmitter<void>();
   private newWebviewEmitter = new vscode.EventEmitter<vscode.WebviewPanel>();
-  private _pngPromise?: Thenable<Maybe<PNG>>;
+  private _pngPromise?: Thenable<Maybe<JimpClass>>;
   public onWebviewOpen = this.newWebviewEmitter.event;
   public onDispose = this.disposeEmitter.event;
   private data: Thenable<Uint8Array>;
@@ -22,13 +23,14 @@ export class PngDocumentDiffView implements vscode.CustomDocument {
     }
   }
 
-  get pngPromise(): Thenable<Maybe<PNG>> {
-    if (!this._pngPromise) {
-      this._pngPromise = this.data.then((buffer) =>
-        buffer.length === 0
+  get pngPromise(): Thenable<Maybe<JimpClass>> {
+      if (!this._pngPromise) {
+      this._pngPromise = this.data.then(async (buffer) =>{
+        return buffer.length === 0
           ? { ok: false }
-          : { ok: true, t: PNG.sync.read(Buffer.from(buffer)) },
-      );
+          : Jimp.fromBuffer(Buffer.from(buffer)).then((t) =>{
+            return({ ok: true, t : t }) })
+        });
     }
     return this._pngPromise;
   }
