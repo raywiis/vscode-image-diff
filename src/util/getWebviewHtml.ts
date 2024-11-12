@@ -79,7 +79,7 @@ export async function getWebviewHtml({
     ),
   );
 
-  let diffResults: ReturnType<typeof generateDiffData> | undefined;
+  let diffResults: Awaited<ReturnType<typeof generateDiffData>> | undefined;
   if (diffTarget) {
     try {
       const [aPng, bPng] = await Promise.all([
@@ -87,7 +87,7 @@ export async function getWebviewHtml({
         document.pngPromise,
       ]);
       if (aPng.ok && bPng.ok) {
-        diffResults = generateDiffData(aPng.t, bPng.t, selectedAlignment);
+        diffResults = await generateDiffData(aPng.t, bPng.t, selectedAlignment);
       }
     } catch (err) {
       console.error(err);
@@ -100,8 +100,6 @@ export async function getWebviewHtml({
     vscode.Uri.joinPath(context.extensionUri, "out", "webview", "viewer.css"),
   );
   const documentWebviewUri = panel.webview.asWebviewUri(document.uri);
-
-  const diffResults2 = await diffResults;
 
   return /* html */ `
     <!DOCTYPE html>
@@ -127,12 +125,12 @@ export async function getWebviewHtml({
           <div id="error-message"></div>
         </div>
         <img id="main-image" draggable="false" src="${
-          diffResults2?.paddedBase64Image ?? documentWebviewUri
+          diffResults?.paddedBase64Image ?? documentWebviewUri
         }" />
         ${
-          diffResults2
+          diffResults
             ? /* html */ `
-          <img id="diff-image" draggable="false" src="${diffResults2.diffUri}"/>
+          <img id="diff-image" draggable="false" src="${diffResults.diffUri}"/>
         `
             : ""
         }
@@ -145,7 +143,7 @@ export async function getWebviewHtml({
             <vscode-checkbox id="diff-checkbox">Diff</vscode-checkbox>
           </div>
           ${
-            diffResults2?.paddedBase64Image
+            diffResults?.paddedBase64Image
               ? /* html */ `
             <div class="dropdown-container">
               <vscode-dropdown id="alignment-dropdown">
@@ -165,10 +163,10 @@ export async function getWebviewHtml({
               : ""
           }
           ${
-            diffResults2 === undefined
+            diffResults === undefined
               ? ""
               : /*html*/ `
-              <div>${diffResults2.diffPixelCount} different pixels</div>
+              <div>${diffResults.diffPixelCount} different pixels</div>
             `
           }
             <div id="control-spacer"></div>
