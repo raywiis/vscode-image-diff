@@ -19,7 +19,7 @@
   ],
   "main": "./out/extension.js",
   "browser": "./out/extension.js",
-  "activationEvents" : [
+  "activationEvents": [
     "image-diff"
   ],
   "contributes": {
@@ -162,7 +162,6 @@
     "typescript-eslint": "^7.18.0"
   },
   "dependencies": {
-    "@jimp/types": "^1.6.0",
     "@types/pngjs": "^6.0.5",
     "@vscode/codicons": "^0.0.36",
     "@vscode/webview-ui-toolkit": "^1.4.0",

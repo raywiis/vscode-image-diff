@@ -8,9 +8,9 @@ import {
   padImage,
 } from "../padImage";
 import { getDiff } from "./getDiff";
-import { JimpClass } from "@jimp/types";
+import { JimpInstance } from "jimp";
 
-function generateDiffData(a: JimpClass, b: JimpClass, alignment: AlignmentOption) {
+function generateDiffData(a: JimpInstance, b: JimpInstance, alignment: AlignmentOption) {
 const mutualWidth = Math.max(a.bitmap.width, b.bitmap.width);
   const mutualHeight = Math.max(a.bitmap.height, b.bitmap.height);
 

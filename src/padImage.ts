@@ -1,6 +1,5 @@
-import { JimpClass } from "@jimp/types";
 import { assert } from "./util/assert";
-import { Jimp } from "jimp";
+import { Jimp, JimpInstance } from "jimp";
 
 export type VerticalAlign = "top" | "middle" | "bottom";
 
@@ -47,7 +46,7 @@ function getLeftPadding(
 export function padImage(
   desiredWidth: number,
   desiredHeight: number,
-  image: JimpClass,
+  image: JimpInstance,
   verticalAlign: VerticalAlign,
   horizontalAlign: HorizontalAlign,
 ) {

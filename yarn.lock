@@ -764,7 +764,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@jimp/types@npm:1.6.0, @jimp/types@npm:^1.6.0":
+"@jimp/types@npm:1.6.0":
   version: 1.6.0
   resolution: "@jimp/types@npm:1.6.0"
   dependencies:
@@ -3958,7 +3958,6 @@ __metadata:
   dependencies:
     "@esbuild-plugins/node-globals-polyfill": "npm:^0.2.3"
     "@eslint/js": "npm:^9.12.0"
-    "@jimp/types": "npm:^1.6.0"
     "@types/glob": "npm:^8.1.0"
     "@types/mocha": "npm:^10.0.9"
     "@types/node": "npm:^20.16.11"

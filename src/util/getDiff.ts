@@ -1,8 +1,7 @@
-import { JimpClass } from "@jimp/types";
-import { Jimp } from "jimp";
+import { Jimp, JimpInstance } from "jimp";
 import pixelMatch from "pixelmatch";
 
-export function getDiff(aPng: JimpClass, bPng: JimpClass) {
+export function getDiff(aPng: JimpInstance, bPng: JimpInstance) {
   const bmp1 = aPng.bitmap;
   const bmp2 = bPng.bitmap;
 
