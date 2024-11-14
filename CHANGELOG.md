@@ -4,6 +4,10 @@ All notable changes to the "image-diff" extension will be documented in this fil
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## 0.0.38
+
+JPEG support
+
 ## 0.0.37
 
 Added a loose matching strategy to make github PR extension files to work with multiple 
