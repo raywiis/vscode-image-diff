@@ -8,19 +8,21 @@ import {
   padImage,
 } from "../padImage";
 import { getDiff } from "./getDiff";
-import { PNG } from "pngjs/browser";
+import { JimpInstance } from "jimp";
 
-function generateDiffData(a: PNG, b: PNG, alignment: AlignmentOption) {
-  const mutualWidth = Math.max(a.width, b.width);
-  const mutualHeight = Math.max(a.height, b.height);
+function generateDiffData(a: JimpInstance, b: JimpInstance, alignment: AlignmentOption) {
+const mutualWidth = Math.max(a.bitmap.width, b.bitmap.width);
+  const mutualHeight = Math.max(a.bitmap.height, b.bitmap.height);
 
-  if (a.width === b.width && a.height === b.height) {
+  if (a.bitmap.width === b.bitmap.width && a.bitmap.height === b.bitmap.height) {
     const diff = getDiff(a, b);
-
-    return {
-      diffUri: diff.diffUri,
-      diffPixelCount: diff.diffPixelCount,
-    } as const;
+    return diff.then((diff) => {
+      return {
+        diffUri: diff.diffUri,
+        diffPixelCount: diff.diffPixelCount,
+        paddedBase64Image: null,
+      } as const;
+    });
   }
 
   const [verticalAlign, horizontalAlign] = alignment.split("-") as [
@@ -42,13 +44,13 @@ function generateDiffData(a: PNG, b: PNG, alignment: AlignmentOption) {
     horizontalAlign,
   );
   const diff = getDiff(paddedA, paddedB);
-  return {
-    diffUri: diff.diffUri,
-    diffPixelCount: diff.diffPixelCount,
-    paddedBase64Image: `data:image/png;base64, ${PNG.sync
-      .write(paddedB)
-      .toString("base64")}`,
-  } as const;
+  return diff.then((diff) => {
+    return {
+      diffUri: diff.diffUri,
+      diffPixelCount: diff.diffPixelCount,
+      paddedBase64Image: `data:image/png;base64, ${paddedB.getBase64("image/png")}`,
+    } as const;
+  });
 }
 
 export type GetWebviewHtmlArgs = {
@@ -77,7 +79,7 @@ export async function getWebviewHtml({
     ),
   );
 
-  let diffResults: ReturnType<typeof generateDiffData> | undefined;
+  let diffResults: Awaited<ReturnType<typeof generateDiffData>> | undefined;
   if (diffTarget) {
     try {
       const [aPng, bPng] = await Promise.all([
@@ -85,7 +87,7 @@ export async function getWebviewHtml({
         document.pngPromise,
       ]);
       if (aPng.ok && bPng.ok) {
-        diffResults = generateDiffData(aPng.t, bPng.t, selectedAlignment);
+        diffResults = await generateDiffData(aPng.t, bPng.t, selectedAlignment);
       }
     } catch (err) {
       console.error(err);
