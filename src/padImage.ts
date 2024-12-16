@@ -54,8 +54,8 @@ export function padImage(
   const actualHeight = image.bitmap.height;
   assert(actualWidth <= desiredWidth && actualHeight <= desiredHeight);
 
-  const paddedImage = Jimp.fromBitmap({
-    data: Buffer.alloc(desiredWidth * desiredHeight * 4),
+  const paddedImage = new Jimp({
+    data: Buffer.alloc(desiredHeight * desiredWidth * 4),
     width: desiredWidth,
     height: desiredHeight,
   });
@@ -67,7 +67,7 @@ export function padImage(
     desiredWidth,
   );
 
-  paddedImage.data.fill(0x00000000);
+  paddedImage.bitmap.data.fill(0x00000000);
   const bytesPerPixel = 4;
 
   for (let i = 0; i < actualHeight; i++) {
@@ -81,7 +81,7 @@ export function padImage(
       const paddedOffset = paddedRowOffset + destinationPixel * bytesPerPixel;
       const imageOffset = imageRowOffset + j * bytesPerPixel;
       const pixel = image.bitmap.data.readInt32LE(imageOffset);
-      paddedImage.data.writeInt32LE(pixel, paddedOffset);
+      paddedImage.bitmap.data.writeInt32LE(pixel, paddedOffset);
     }
   }
 

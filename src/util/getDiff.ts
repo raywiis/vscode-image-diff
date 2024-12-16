@@ -1,7 +1,7 @@
 import { Jimp, JimpInstance } from "jimp";
 import pixelMatch from "pixelmatch";
 
-export function getDiff(aPng: JimpInstance, bPng: JimpInstance) {
+export async function getDiff(aPng: JimpInstance, bPng: JimpInstance) {
   const bmp1 = aPng.bitmap;
   const bmp2 = bPng.bitmap;
 
@@ -23,12 +23,10 @@ export function getDiff(aPng: JimpInstance, bPng: JimpInstance) {
       alpha: 0.1,
     },
   );
-  
-  const base64 : Promise<string> = diff.getBase64("image/png");
-  return base64.then((diffUri) => {
-    return {
-      diffUri,
-      diffPixelCount,
-    } as const;
-  });
+
+  const diffUri: string = await diff.getBase64("image/png");
+  return {
+    diffUri,
+    diffPixelCount,
+  } as const;
 }

@@ -10,19 +10,24 @@ import {
 import { getDiff } from "./getDiff";
 import { JimpInstance } from "jimp";
 
-function generateDiffData(a: JimpInstance, b: JimpInstance, alignment: AlignmentOption) {
-const mutualWidth = Math.max(a.bitmap.width, b.bitmap.width);
+async function generateDiffData(
+  a: JimpInstance,
+  b: JimpInstance,
+  alignment: AlignmentOption,
+) {
+  const mutualWidth = Math.max(a.bitmap.width, b.bitmap.width);
   const mutualHeight = Math.max(a.bitmap.height, b.bitmap.height);
 
-  if (a.bitmap.width === b.bitmap.width && a.bitmap.height === b.bitmap.height) {
-    const diff = getDiff(a, b);
-    return diff.then((diff) => {
-      return {
-        diffUri: diff.diffUri,
-        diffPixelCount: diff.diffPixelCount,
-        paddedBase64Image: null,
-      } as const;
-    });
+  if (
+    a.bitmap.width === b.bitmap.width &&
+    a.bitmap.height === b.bitmap.height
+  ) {
+    const diff = await getDiff(a, b);
+    return {
+      diffUri: diff.diffUri,
+      diffPixelCount: diff.diffPixelCount,
+      paddedBase64Image: null,
+    } as const;
   }
 
   const [verticalAlign, horizontalAlign] = alignment.split("-") as [
@@ -43,14 +48,13 @@ const mutualWidth = Math.max(a.bitmap.width, b.bitmap.width);
     verticalAlign,
     horizontalAlign,
   );
-  const diff = getDiff(paddedA, paddedB);
-  return diff.then((diff) => {
-    return {
-      diffUri: diff.diffUri,
-      diffPixelCount: diff.diffPixelCount,
-      paddedBase64Image: `data:image/png;base64, ${paddedB.getBase64("image/png")}`,
-    } as const;
-  });
+  const diff = await getDiff(paddedA, paddedB);
+  const paddedBase64Image = await paddedB.getBase64("image/png");
+  return {
+    diffUri: diff.diffUri,
+    diffPixelCount: diff.diffPixelCount,
+    paddedBase64Image,
+  } as const;
 }
 
 export type GetWebviewHtmlArgs = {

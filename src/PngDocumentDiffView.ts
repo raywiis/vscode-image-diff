@@ -23,13 +23,14 @@ export class PngDocumentDiffView implements vscode.CustomDocument {
   }
 
   get pngPromise(): Thenable<Maybe<JimpInstance>> {
-      if (!this._pngPromise) {
-      this._pngPromise = this.data.then(async (buffer) =>{
+    if (!this._pngPromise) {
+      this._pngPromise = this.data.then(async (buffer) => {
         return buffer.length === 0
           ? { ok: false }
-          : Jimp.fromBuffer(Buffer.from(buffer)).then((t) =>{
-            return({ ok: true, t : t as JimpInstance }) })
-        });
+          : Jimp.fromBuffer(Buffer.from(buffer)).then((t) => {
+              return { ok: true, t: t as JimpInstance };
+            });
+      });
     }
     return this._pngPromise;
   }
