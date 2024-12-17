@@ -43,9 +43,7 @@ export class ImageDiffViewer
   lastActiveDiffPanel: vscode.WebviewPanel | undefined;
   lastActiveNonDiffPanel: vscode.WebviewPanel | undefined;
 
-  constructor(private context: vscode.ExtensionContext) {
-    context.extensionUri;
-  }
+  constructor(private context: vscode.ExtensionContext) {}
 
   openCustomDocument(
     uri: vscode.Uri,
