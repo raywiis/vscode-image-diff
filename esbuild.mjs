@@ -34,5 +34,9 @@ if (isWatchMode) {
   const ctx = await esbuild.context(config);
   await ctx.watch();
 } else {
-  await esbuild.build(config);
+  const result = await esbuild.build(config);
+  if (result.metafile) {
+    const fs = await import('fs/promises')
+    fs.writeFile(`./${requestedConfig}.metafile.json`, JSON.stringify(result.metafile))
+  }
 }

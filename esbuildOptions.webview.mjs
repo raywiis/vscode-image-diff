@@ -4,9 +4,11 @@
 const buildOptions = {
   entryPoints: ['./src/webview/viewer.ts'],
   bundle: true,
+  metafile: true,
   outfile: './out/webview/viewer.js',
   logLevel: 'info',
-  sourcemap: 'inline',
+  minify: true,
+  treeShaking: true,
 };
 
 export default buildOptions;
