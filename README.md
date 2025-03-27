@@ -1,6 +1,8 @@
-# vscode-image-diff
+# Image diff viewer
 
 Replaces the built in image viewer for png images.
+
+![demo-image](./hero.gif)
 
 ## Features
 
