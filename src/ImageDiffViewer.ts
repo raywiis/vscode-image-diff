@@ -49,7 +49,13 @@ export class ImageDiffViewer
     uri: vscode.Uri,
     openContext: vscode.CustomDocumentOpenContext,
   ): PngDocumentDiffView {
+    try {
     return new PngDocumentDiffView(uri, openContext.untitledDocumentData);
+}catch(err) {
+  console.log('failed to read', { err })
+  throw err;
+}
+
   }
 
   toggleActivePanelDiff() {

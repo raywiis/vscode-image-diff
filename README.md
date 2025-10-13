@@ -30,6 +30,15 @@ Replaces the built in image viewer for jpeg and png images.
 - `image-diff.viewer.imageRendering` - Sets the `image-rendering` css property on the image
 - `image-diff.diff.defaultAlign` - Sets the default diff alignment for images with different dimensions.
 
+## GIT LFS
+
+Currently the extension doesn't handle files that are versioned with [git-lfs](https://git-lfs.com/).
+The workaround to have the files work is to change a git config.
+```sh
+# Run this is your repo
+git config diff.lfs.textconv cat
+```
+
 ## Known Issues
 
 - The swipe mode suffers from transform and scaling limits that don't allow for
