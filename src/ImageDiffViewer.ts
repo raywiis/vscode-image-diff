@@ -151,7 +151,8 @@ export class ImageDiffViewer
       return;
     }
 
-    webviewPanel.title = "This is shown to user?";
+    const documentName = document.uri.path.split('/').at(-1) ?? '';
+    webviewPanel.title = documentName;
     webviewPanel.onDidChangeViewState((event) => {
       if (!event.webviewPanel.active) {
         return;
