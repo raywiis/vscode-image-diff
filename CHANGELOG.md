@@ -4,6 +4,10 @@ All notable changes to the "image-diff" extension will be documented in this fil
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## 0.0.49
+
+Fix https://github.com/raywiis/vscode-image-diff/issues/23
+
 ## 0.0.48
 
 Update readme with info about git-lfs
