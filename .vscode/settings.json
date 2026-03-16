@@ -14,5 +14,6 @@
     "pngjs",
     "userdata"
   ],
-  "cmake.configureOnOpen": false
+  "cmake.configureOnOpen": false,
+  "terminal.integrated.defaultProfile.windows": "PowerShell"
 }
