@@ -8,7 +8,7 @@ import {
   padImage,
 } from "../padImage";
 import { getDiff } from "./getDiff";
-import { JimpInstance } from "jimp";
+import { Jimp, JimpInstance } from "jimp";
 
 async function generateDiffData(
   a: JimpInstance,
@@ -65,6 +65,13 @@ export type GetWebviewHtmlArgs = {
   selectedAlignment: AlignmentOption;
 };
 
+const getBase64DataUri = async (uri: vscode.Uri) => {
+  const data = await vscode.workspace.fs.readFile(uri);
+  const buffer = Buffer.from(data)
+  const jimpInstance = await Jimp.fromBuffer(buffer);
+  return jimpInstance.getBase64('image/png');
+}
+
 export async function getWebviewHtml({
   panel,
   document,
@@ -103,7 +110,10 @@ export async function getWebviewHtml({
   const styleUri = webview.asWebviewUri(
     vscode.Uri.joinPath(context.extensionUri, "out", "webview", "viewer.css"),
   );
-  const documentWebviewUri = panel.webview.asWebviewUri(document.uri);
+
+  const documentWebviewUri = document.uri.scheme === 'file'
+    ? panel.webview.asWebviewUri(document.uri)
+    : await getBase64DataUri(document.uri);
 
   return /* html */ `
     <!DOCTYPE html>
