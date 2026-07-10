@@ -54,7 +54,7 @@
       {
         "command": "image-diff.toggle-diff",
         "key": "shift+d",
-        "when": "activeWebviewPanelId == 'image-diff.image-with-diff'"
+        "when": "!terminalFocus && !textInputFocus && activeWebviewPanelId == 'image-diff.image-with-diff'"
       }
     ],
     "customEditors": [

@@ -6,3 +6,4 @@ node_modules
 !.yarn/releases
 *.vsix
 *.metafile.json
+.DS_STORE
