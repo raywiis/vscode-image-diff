@@ -4,6 +4,11 @@ All notable changes to the "image-diff" extension will be documented in this fil
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## 0.0.51
+
+Added extra conditions for shortcut trigger - no terminal focus and no input focus
+- https://github.com/raywiis/vscode-image-diff/issues/28
+
 ## 0.0.50
 
 Fix broken image loading for non-file uri sources
