@@ -1,6 +1,7 @@
 import * as vscode from "vscode";
 import { Maybe } from "./util/maybe";
 import { Jimp, JimpInstance } from "jimp";
+import { decodeJpeg, isJpeg } from "./wasm";
 
 export class PngDocumentDiffView implements vscode.CustomDocument {
   private disposeEmitter = new vscode.EventEmitter<void>();
@@ -25,11 +26,22 @@ export class PngDocumentDiffView implements vscode.CustomDocument {
   get pngPromise(): Thenable<Maybe<JimpInstance>> {
     if (!this._pngPromise) {
       this._pngPromise = this.data.then(async (buffer) => {
-        return buffer.length === 0
-          ? { ok: false }
-          : Jimp.fromBuffer(Buffer.from(buffer)).then((t) => {
-              return { ok: true, t: t as JimpInstance };
-            });
+        if (buffer.length === 0) {
+          return { ok: false };
+        }
+        if (isJpeg(buffer)) {
+          const { data, width, height } = await decodeJpeg(buffer);
+
+          const t = new Jimp({
+            data: Buffer.from(data.buffer, data.byteOffset, data.byteLength),
+            width,
+            height,
+          }) as JimpInstance;
+
+          return { ok: true, t };
+        }
+        const t = await Jimp.fromBuffer(Buffer.from(buffer));
+        return { ok: true, t: t as JimpInstance };
       });
     }
     return this._pngPromise;

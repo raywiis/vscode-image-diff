@@ -10,11 +10,14 @@ const buildOptions = {
   outfile: './out/extension.js',
   logLevel: 'info',
   metafile: true,
-  minify: true,
+  minify: false,
   treeShaking: true,
   platform: 'browser',
   format: 'cjs',
   external: ['vscode'],
+  loader: {
+    ".wasm": 'binary',
+  },
   define: {
     global: 'globalThis'
   },
