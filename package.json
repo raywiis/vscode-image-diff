@@ -67,6 +67,9 @@
           },
           {
             "filenamePattern": "*.jpg"
+          },
+          {
+            "filenamePattern": "*.webp"
           }
         ],
         "priority": "default"
@@ -164,6 +167,7 @@
   "dependencies": {
     "@jsquash/jpeg": "^1.6.0",
     "@jsquash/png": "^3.1.1",
+    "@jsquash/webp": "^1.5.0",
     "@types/pngjs": "^6.0.5",
     "@vscode/codicons": "^0.0.36",
     "@vscode/webview-ui-toolkit": "^1.4.0",

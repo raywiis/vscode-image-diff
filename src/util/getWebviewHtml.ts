@@ -9,7 +9,7 @@ import {
 } from "../padImage";
 import { getDiff } from "./getDiff";
 import { RawImage } from "./rawImage";
-import { encodePngDataUri, isJpeg } from "../wasm";
+import { encodePngDataUri, isJpeg, isWebp } from "../wasm";
 
 async function generateDiffData(
   a: RawImage,
@@ -65,7 +65,11 @@ export type GetWebviewHtmlArgs = {
 
 const getBase64DataUri = async (uri: vscode.Uri) => {
   const data = await vscode.workspace.fs.readFile(uri);
-  const mime = isJpeg(data) ? "image/jpeg" : "image/png";
+  const mime = isJpeg(data)
+    ? "image/jpeg"
+    : isWebp(data)
+    ? "image/webp"
+    : "image/png";
   return `data:${mime};base64,${Buffer.from(data).toString("base64")}`;
 };
 

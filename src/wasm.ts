@@ -5,6 +5,9 @@ import { init as initPng } from "@jsquash/png/decode";
 import decodePngData from "@jsquash/png/decode";
 import encodePngData from "@jsquash/png/encode";
 import pngDecWasm from "@jsquash/png/codec/pkg/squoosh_png_bg.wasm";
+import { init as initWebp } from "@jsquash/webp/decode";
+import decodeWebpData from "@jsquash/webp/decode";
+import webpDecWasm from "@jsquash/webp/codec/dec/webp_dec.wasm";
 import { RawImage } from "./util/rawImage";
 
 let ready = false;
@@ -24,9 +27,10 @@ let ready = false;
  *     the decoder has no `ImageData` constructor to build its result with. The
  *     extension host is Node (no DOM), so we install the same minimal polyfill.
  *
- * The PNG codec is wasm-bindgen rather than emscripten. It only builds a
- * `new URL(...)` when `init()` is called with no argument, so handing it the
- * precompiled module sidesteps that; it shares the `ImageData` polyfill above.
+ * The WebP codec is emscripten like JPEG, so it needs the same `locateFile`
+ * workaround. The PNG codec is wasm-bindgen rather than emscripten: it only
+ * builds a `new URL(...)` when `init()` is called with no argument, so handing
+ * it the precompiled module sidesteps that. All share the `ImageData` polyfill.
  */
 function polyfillImageData() {
   const g = globalThis as unknown as { ImageData?: unknown };
@@ -47,12 +51,13 @@ function polyfillImageData() {
 async function initWasm(): Promise<void> {
   polyfillImageData();
 
-  const [jpegDecModule, pngDecModule] = await Promise.all([
+  const [jpegDecModule, pngDecModule, webpDecModule] = await Promise.all([
     WebAssembly.compile(jpegDecWasm),
     // `@jsquash/png` ships its own `squoosh_png_bg.wasm.d.ts`, which shadows our
     // ambient `*.wasm` byte declaration, so this import is mistyped as the
     // wasm-bindgen module. esbuild's binary loader still yields bytes at runtime.
     WebAssembly.compile(pngDecWasm as unknown as Uint8Array),
+    WebAssembly.compile(webpDecWasm),
   ]);
 
   await Promise.all([
@@ -63,6 +68,11 @@ async function initWasm(): Promise<void> {
     ),
     // wasm-bindgen's `init` accepts a precompiled `WebAssembly.Module` directly.
     initPng(pngDecModule),
+    initWebp(
+      webpDecModule,
+      // @ts-expect-error Same emscripten locateFile workaround as jpeg.
+      { locateFile: (path) => path },
+    ),
   ]);
 
   ready = true;
@@ -86,6 +96,23 @@ export function isJpeg(buffer: Uint8Array): boolean {
   );
 }
 
+/** Detects a WebP by its `RIFF....WEBP` container header. */
+export function isWebp(buffer: Uint8Array): boolean {
+  return (
+    buffer.length >= 12 &&
+    // "RIFF"
+    buffer[0] === 0x52 &&
+    buffer[1] === 0x49 &&
+    buffer[2] === 0x46 &&
+    buffer[3] === 0x46 &&
+    // "WEBP"
+    buffer[8] === 0x57 &&
+    buffer[9] === 0x45 &&
+    buffer[10] === 0x42 &&
+    buffer[11] === 0x50
+  );
+}
+
 function toArrayBuffer(buffer: Uint8Array): ArrayBuffer {
   return buffer.buffer.slice(
     buffer.byteOffset,
@@ -101,6 +128,11 @@ export async function decodeJpeg(buffer: Uint8Array): Promise<ImageData> {
 export async function decodePng(buffer: Uint8Array): Promise<ImageData> {
   await wasmReady;
   return decodePngData(toArrayBuffer(buffer));
+}
+
+export async function decodeWebp(buffer: Uint8Array): Promise<ImageData> {
+  await wasmReady;
+  return decodeWebpData(toArrayBuffer(buffer));
 }
 
 export async function encodePngDataUri(image: RawImage): Promise<string> {

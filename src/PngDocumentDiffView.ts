@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
 import { Maybe } from "./util/maybe";
 import { RawImage } from "./util/rawImage";
-import { decodeJpeg, decodePng, isJpeg } from "./wasm";
+import { decodeJpeg, decodePng, decodeWebp, isJpeg, isWebp } from "./wasm";
 
 export class PngDocumentDiffView implements vscode.CustomDocument {
   private disposeEmitter = new vscode.EventEmitter<void>();
@@ -29,10 +29,11 @@ export class PngDocumentDiffView implements vscode.CustomDocument {
         if (buffer.length === 0) {
           return { ok: false };
         }
-        const jpeg = isJpeg(buffer);
-        const { data, width, height } = jpeg
+        const { data, width, height } = isJpeg(buffer)
           ? await decodeJpeg(buffer)
-          : await decodePng(buffer);
+          : isWebp(buffer)
+            ? await decodeWebp(buffer)
+            : await decodePng(buffer);
 
         const t: RawImage = {
           data: Buffer.from(data.buffer, data.byteOffset, data.byteLength),
