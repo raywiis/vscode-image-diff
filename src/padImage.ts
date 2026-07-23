@@ -1,5 +1,5 @@
 import { assert } from "./util/assert";
-import { Jimp, JimpInstance } from "jimp";
+import { RawImage } from "./util/rawImage";
 
 export type VerticalAlign = "top" | "middle" | "bottom";
 
@@ -46,19 +46,19 @@ function getLeftPadding(
 export function padImage(
   desiredWidth: number,
   desiredHeight: number,
-  image: JimpInstance,
+  image: RawImage,
   verticalAlign: VerticalAlign,
   horizontalAlign: HorizontalAlign,
-) {
-  const actualWidth = image.bitmap.width;
-  const actualHeight = image.bitmap.height;
+): RawImage {
+  const actualWidth = image.width;
+  const actualHeight = image.height;
   assert(actualWidth <= desiredWidth && actualHeight <= desiredHeight);
 
-  const paddedImage = new Jimp({
+  const paddedImage: RawImage = {
     data: Buffer.alloc(desiredHeight * desiredWidth * 4),
     width: desiredWidth,
     height: desiredHeight,
-  });
+  };
 
   const topPadding = getTopPadding(verticalAlign, actualHeight, desiredHeight);
   const leftPadding = getLeftPadding(
@@ -67,7 +67,7 @@ export function padImage(
     desiredWidth,
   );
 
-  paddedImage.bitmap.data.fill(0x00000000);
+  paddedImage.data.fill(0x00000000);
   const bytesPerPixel = 4;
 
   for (let i = 0; i < actualHeight; i++) {
@@ -80,8 +80,8 @@ export function padImage(
       const destinationPixel = j + leftPadding;
       const paddedOffset = paddedRowOffset + destinationPixel * bytesPerPixel;
       const imageOffset = imageRowOffset + j * bytesPerPixel;
-      const pixel = image.bitmap.data.readInt32LE(imageOffset);
-      paddedImage.bitmap.data.writeInt32LE(pixel, paddedOffset);
+      const pixel = image.data.readInt32LE(imageOffset);
+      paddedImage.data.writeInt32LE(pixel, paddedOffset);
     }
   }
 

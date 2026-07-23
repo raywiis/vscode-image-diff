@@ -1,9 +1,6 @@
 /**
  * Type for `.wasm` imports.
- *
- * esbuild's `binary` loader (configured in the esbuild option files) turns a
- * `.wasm` import into the file's raw bytes as a `Uint8Array`. This declaration
- * makes TypeScript agree.
+ * Esbuild should be configured to load wasm as the type specified here
  */
 declare module "*.wasm" {
   // `Uint8Array<ArrayBuffer>` (not the default `ArrayBufferLike`) so the bytes

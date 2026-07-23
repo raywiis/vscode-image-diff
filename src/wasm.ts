@@ -1,6 +1,11 @@
 import { init as initJpeg } from "@jsquash/jpeg/decode";
 import decodeJpegData from "@jsquash/jpeg/decode";
 import jpegDecWasm from "@jsquash/jpeg/codec/dec/mozjpeg_dec.wasm";
+import { init as initPng } from "@jsquash/png/decode";
+import decodePngData from "@jsquash/png/decode";
+import encodePngData from "@jsquash/png/encode";
+import pngDecWasm from "@jsquash/png/codec/pkg/squoosh_png_bg.wasm";
+import { RawImage } from "./util/rawImage";
 
 let ready = false;
 
@@ -18,6 +23,10 @@ let ready = false;
  *  2. The glue only installs its `ImageData` polyfill for node/cloudflare, so
  *     the decoder has no `ImageData` constructor to build its result with. The
  *     extension host is Node (no DOM), so we install the same minimal polyfill.
+ *
+ * The PNG codec is wasm-bindgen rather than emscripten. It only builds a
+ * `new URL(...)` when `init()` is called with no argument, so handing it the
+ * precompiled module sidesteps that; it shares the `ImageData` polyfill above.
  */
 function polyfillImageData() {
   const g = globalThis as unknown as { ImageData?: unknown };
@@ -38,15 +47,23 @@ function polyfillImageData() {
 async function initWasm(): Promise<void> {
   polyfillImageData();
 
-  console.time("wasm jpeg compile");
-  const jpegDecModule = await WebAssembly.compile(jpegDecWasm);
-  console.timeEnd("wasm jpeg compile");
+  const [jpegDecModule, pngDecModule] = await Promise.all([
+    WebAssembly.compile(jpegDecWasm),
+    // `@jsquash/png` ships its own `squoosh_png_bg.wasm.d.ts`, which shadows our
+    // ambient `*.wasm` byte declaration, so this import is mistyped as the
+    // wasm-bindgen module. esbuild's binary loader still yields bytes at runtime.
+    WebAssembly.compile(pngDecWasm as unknown as Uint8Array),
+  ]);
 
-  await initJpeg(
-    jpegDecModule,
-    // @ts-expect-error The module needs this override because emscripten confuses the runtime due to polyfill
-    { locateFile: (path) => path }
-  );
+  await Promise.all([
+    initJpeg(
+      jpegDecModule,
+      // @ts-expect-error The module needs this override because emscripten confuses the runtime due to polyfill
+      { locateFile: (path) => path },
+    ),
+    // wasm-bindgen's `init` accepts a precompiled `WebAssembly.Module` directly.
+    initPng(pngDecModule),
+  ]);
 
   ready = true;
 }
@@ -69,13 +86,25 @@ export function isJpeg(buffer: Uint8Array): boolean {
   );
 }
 
-/** Decodes a JPEG buffer to raw RGBA pixels using the wasm decoder. */
-export async function decodeJpeg(buffer: Uint8Array): Promise<ImageData> {
-  await wasmReady;
-  // Copy out an exact ArrayBuffer: `buffer` may be a view onto a larger pool.
-  const bytes = buffer.buffer.slice(
+function toArrayBuffer(buffer: Uint8Array): ArrayBuffer {
+  return buffer.buffer.slice(
     buffer.byteOffset,
     buffer.byteOffset + buffer.byteLength,
-  );
-  return decodeJpegData(bytes as ArrayBuffer);
+  ) as ArrayBuffer;
+}
+
+export async function decodeJpeg(buffer: Uint8Array): Promise<ImageData> {
+  await wasmReady;
+  return decodeJpegData(toArrayBuffer(buffer));
+}
+
+export async function decodePng(buffer: Uint8Array): Promise<ImageData> {
+  await wasmReady;
+  return decodePngData(toArrayBuffer(buffer));
+}
+
+export async function encodePngDataUri(image: RawImage): Promise<string> {
+  await wasmReady;
+  const output = await encodePngData(image as unknown as ImageData);
+  return `data:image/png;base64,${Buffer.from(output).toString("base64")}`;
 }

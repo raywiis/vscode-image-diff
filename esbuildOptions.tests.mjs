@@ -17,7 +17,10 @@ const buildOptions = {
   sourcemap: 'inline',
   platform: 'node',
   format: 'cjs',
-  external: ['vscode', 'mocha']
+  external: ['vscode', 'mocha'],
+  loader: {
+    '.wasm': 'binary',
+  },
 };
 
 export default buildOptions;

@@ -1,22 +1,21 @@
-import { Jimp, JimpInstance } from "jimp";
 import pixelMatch from "pixelmatch";
+import { RawImage } from "./rawImage";
+import { encodePngDataUri } from "../wasm";
 
-export async function getDiff(aPng: JimpInstance, bPng: JimpInstance) {
-  const bmp1 = aPng.bitmap;
-  const bmp2 = bPng.bitmap;
-
-  const diff = new Jimp({
-    width: bmp1.width,
-    height: bmp1.height,
-    color: 0xffffffff,
-  });
+export async function getDiff(aPng: RawImage, bPng: RawImage) {
+  // pixelmatch writes every output pixel, so the buffer only needs allocating.
+  const diff: RawImage = {
+    data: Buffer.alloc(aPng.width * aPng.height * 4),
+    width: aPng.width,
+    height: aPng.height,
+  };
 
   const diffPixelCount = pixelMatch(
-    bmp1.data,
-    bmp2.data,
-    diff.bitmap.data,
-    diff.bitmap.width,
-    diff.bitmap.height,
+    aPng.data,
+    bPng.data,
+    diff.data,
+    diff.width,
+    diff.height,
     {
       threshold: 0,
       includeAA: true,
@@ -24,7 +23,7 @@ export async function getDiff(aPng: JimpInstance, bPng: JimpInstance) {
     },
   );
 
-  const diffUri: string = await diff.getBase64("image/png");
+  const diffUri = await encodePngDataUri(diff);
   return {
     diffUri,
     diffPixelCount,

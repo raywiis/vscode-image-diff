@@ -8,20 +8,18 @@ import {
   padImage,
 } from "../padImage";
 import { getDiff } from "./getDiff";
-import { Jimp, JimpInstance } from "jimp";
+import { RawImage } from "./rawImage";
+import { encodePngDataUri, isJpeg } from "../wasm";
 
 async function generateDiffData(
-  a: JimpInstance,
-  b: JimpInstance,
+  a: RawImage,
+  b: RawImage,
   alignment: AlignmentOption,
 ) {
-  const mutualWidth = Math.max(a.bitmap.width, b.bitmap.width);
-  const mutualHeight = Math.max(a.bitmap.height, b.bitmap.height);
+  const mutualWidth = Math.max(a.width, b.width);
+  const mutualHeight = Math.max(a.height, b.height);
 
-  if (
-    a.bitmap.width === b.bitmap.width &&
-    a.bitmap.height === b.bitmap.height
-  ) {
+  if (a.width === b.width && a.height === b.height) {
     const diff = await getDiff(a, b);
     return {
       diffUri: diff.diffUri,
@@ -49,7 +47,7 @@ async function generateDiffData(
     horizontalAlign,
   );
   const diff = await getDiff(paddedA, paddedB);
-  const paddedBase64Image = await paddedB.getBase64("image/png");
+  const paddedBase64Image = await encodePngDataUri(paddedB);
   return {
     diffUri: diff.diffUri,
     diffPixelCount: diff.diffPixelCount,
@@ -67,10 +65,9 @@ export type GetWebviewHtmlArgs = {
 
 const getBase64DataUri = async (uri: vscode.Uri) => {
   const data = await vscode.workspace.fs.readFile(uri);
-  const buffer = Buffer.from(data)
-  const jimpInstance = await Jimp.fromBuffer(buffer);
-  return jimpInstance.getBase64('image/png');
-}
+  const mime = isJpeg(data) ? "image/jpeg" : "image/png";
+  return `data:${mime};base64,${Buffer.from(data).toString("base64")}`;
+};
 
 export async function getWebviewHtml({
   panel,
