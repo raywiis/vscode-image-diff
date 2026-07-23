@@ -1,6 +1,3 @@
-import { NodeGlobalsPolyfillPlugin } from '@esbuild-plugins/node-globals-polyfill';
-
-
 /**
  * @type {import('esbuild').BuildOptions}
  */
@@ -21,12 +18,7 @@ const buildOptions = {
   define: {
     global: 'globalThis'
   },
-  plugins: [
-    NodeGlobalsPolyfillPlugin({
-      process: true,
-      buffer: true
-    }),
-  ]
+  plugins: []
 };
 
 export default buildOptions;

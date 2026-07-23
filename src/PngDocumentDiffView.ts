@@ -36,7 +36,7 @@ export class PngDocumentDiffView implements vscode.CustomDocument {
             : await decodePng(buffer);
 
         const t: RawImage = {
-          data: Buffer.from(data.buffer, data.byteOffset, data.byteLength),
+          data: new Uint8Array(data.buffer, data.byteOffset, data.byteLength),
           width,
           height,
         };

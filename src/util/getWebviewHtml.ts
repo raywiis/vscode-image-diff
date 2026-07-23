@@ -10,6 +10,7 @@ import {
 import { getDiff } from "./getDiff";
 import { RawImage } from "./rawImage";
 import { encodePngDataUri, isJpeg, isWebp } from "../wasm";
+import { bytesToBase64 } from "./base64";
 
 async function generateDiffData(
   a: RawImage,
@@ -70,7 +71,7 @@ const getBase64DataUri = async (uri: vscode.Uri) => {
     : isWebp(data)
     ? "image/webp"
     : "image/png";
-  return `data:${mime};base64,${Buffer.from(data).toString("base64")}`;
+  return `data:${mime};base64,${bytesToBase64(data)}`;
 };
 
 export async function getWebviewHtml({

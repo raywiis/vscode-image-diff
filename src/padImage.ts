@@ -55,7 +55,7 @@ export function padImage(
   assert(actualWidth <= desiredWidth && actualHeight <= desiredHeight);
 
   const paddedImage: RawImage = {
-    data: Buffer.alloc(desiredHeight * desiredWidth * 4),
+    data: new Uint8Array(desiredHeight * desiredWidth * 4),
     width: desiredWidth,
     height: desiredHeight,
   };
@@ -67,22 +67,19 @@ export function padImage(
     desiredWidth,
   );
 
-  paddedImage.data.fill(0x00000000);
   const bytesPerPixel = 4;
+  const rowBytes = actualWidth * bytesPerPixel;
 
   for (let i = 0; i < actualHeight; i++) {
     const destinationRow = topPadding + i;
+    const paddedRowOffset =
+      bytesPerPixel * (desiredWidth * destinationRow + leftPadding);
+    const imageRowOffset = rowBytes * i;
 
-    const paddedRowOffset = bytesPerPixel * desiredWidth * destinationRow;
-    const imageRowOffset = bytesPerPixel * actualWidth * i;
-
-    for (let j = 0; j < actualWidth; j++) {
-      const destinationPixel = j + leftPadding;
-      const paddedOffset = paddedRowOffset + destinationPixel * bytesPerPixel;
-      const imageOffset = imageRowOffset + j * bytesPerPixel;
-      const pixel = image.data.readInt32LE(imageOffset);
-      paddedImage.data.writeInt32LE(pixel, paddedOffset);
-    }
+    paddedImage.data.set(
+      image.data.subarray(imageRowOffset, imageRowOffset + rowBytes),
+      paddedRowOffset,
+    );
   }
 
   return paddedImage;

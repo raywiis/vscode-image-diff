@@ -9,6 +9,7 @@ import { init as initWebp } from "@jsquash/webp/decode";
 import decodeWebpData from "@jsquash/webp/decode";
 import webpDecWasm from "@jsquash/webp/codec/dec/webp_dec.wasm";
 import { RawImage } from "./util/rawImage";
+import { bytesToBase64 } from "./util/base64";
 
 let ready = false;
 
@@ -56,7 +57,7 @@ async function initWasm(): Promise<void> {
     // `@jsquash/png` ships its own `squoosh_png_bg.wasm.d.ts`, which shadows our
     // ambient `*.wasm` byte declaration, so this import is mistyped as the
     // wasm-bindgen module. esbuild's binary loader still yields bytes at runtime.
-    WebAssembly.compile(pngDecWasm as unknown as Uint8Array),
+    WebAssembly.compile(pngDecWasm as unknown as Uint8Array<ArrayBuffer>),
     WebAssembly.compile(webpDecWasm),
   ]);
 
@@ -138,5 +139,5 @@ export async function decodeWebp(buffer: Uint8Array): Promise<ImageData> {
 export async function encodePngDataUri(image: RawImage): Promise<string> {
   await wasmReady;
   const output = await encodePngData(image as unknown as ImageData);
-  return `data:image/png;base64,${Buffer.from(output).toString("base64")}`;
+  return `data:image/png;base64,${bytesToBase64(new Uint8Array(output))}`;
 }

@@ -5,7 +5,7 @@ import { encodePngDataUri } from "../wasm";
 export async function getDiff(aPng: RawImage, bPng: RawImage) {
   // pixelmatch writes every output pixel, so the buffer only needs allocating.
   const diff: RawImage = {
-    data: Buffer.alloc(aPng.width * aPng.height * 4),
+    data: new Uint8Array(aPng.width * aPng.height * 4),
     width: aPng.width,
     height: aPng.height,
   };
