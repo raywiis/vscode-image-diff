@@ -4,6 +4,12 @@ All notable changes to the "image-diff" extension will be documented in this fil
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## 0.1.0
+
+Replaced jimp with jSquash for format support
+Added webp support
+- https://github.com/raywiis/vscode-image-diff/issues/29
+
 ## 0.0.51
 
 Added extra conditions for shortcut trigger - no terminal focus and no input focus
