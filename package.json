@@ -146,22 +146,22 @@
     "types:watch": "tsc --watch"
   },
   "devDependencies": {
-    "@eslint/js": "^9.17.0",
+    "@eslint/js": "^9.39.5",
     "@types/glob": "^8.1.0",
     "@types/mocha": "^10.0.10",
-    "@types/node": "^20.17.10",
+    "@types/node": "^20.19.43",
     "@types/pixelmatch": "^5.2.6",
     "@types/vscode": "^1.90.0",
     "@vscode/test-electron": "^2.4.1",
-    "@vscode/vsce": "^3.2.1",
-    "esbuild": "^0.24.0",
-    "eslint": "^9.17.0",
+    "@vscode/vsce": "^3.9.2",
+    "esbuild": "^0.28.1",
+    "eslint": "^9.39.5",
     "fast-check": "^3.23.2",
     "glob": "^11.0.0",
     "mocha": "11.0.2",
-    "prettier": "^3.4.2",
+    "prettier": "^3.9.6",
     "typescript": "^7.0.2",
-    "typescript-eslint": "^8.18.1"
+    "typescript-eslint": "^8.65.0"
   },
   "dependencies": {
     "@jsquash/jpeg": "^1.6.0",
