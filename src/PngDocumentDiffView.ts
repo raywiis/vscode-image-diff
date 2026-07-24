@@ -1,11 +1,12 @@
 import * as vscode from "vscode";
 import { Maybe } from "./util/maybe";
-import { Jimp, JimpInstance } from "jimp";
+import { RawImage } from "./util/rawImage";
+import { decodeJpeg, decodePng, decodeWebp, isJpeg, isWebp } from "./wasm";
 
 export class PngDocumentDiffView implements vscode.CustomDocument {
   private disposeEmitter = new vscode.EventEmitter<void>();
   private newWebviewEmitter = new vscode.EventEmitter<vscode.WebviewPanel>();
-  private _pngPromise?: Thenable<Maybe<JimpInstance>>;
+  private _pngPromise?: Thenable<Maybe<RawImage>>;
   public onWebviewOpen = this.newWebviewEmitter.event;
   public onDispose = this.disposeEmitter.event;
   private data: Thenable<Uint8Array>;
@@ -22,14 +23,24 @@ export class PngDocumentDiffView implements vscode.CustomDocument {
     }
   }
 
-  get pngPromise(): Thenable<Maybe<JimpInstance>> {
+  get pngPromise(): Thenable<Maybe<RawImage>> {
     if (!this._pngPromise) {
       this._pngPromise = this.data.then(async (buffer) => {
-        return buffer.length === 0
-          ? { ok: false }
-          : Jimp.fromBuffer(Buffer.from(buffer)).then((t) => {
-              return { ok: true, t: t as JimpInstance };
-            });
+        if (buffer.length === 0) {
+          return { ok: false };
+        }
+        const { data, width, height } = isJpeg(buffer)
+          ? await decodeJpeg(buffer)
+          : isWebp(buffer)
+            ? await decodeWebp(buffer)
+            : await decodePng(buffer);
+
+        const t: RawImage = {
+          data: new Uint8Array(data.buffer, data.byteOffset, data.byteLength),
+          width,
+          height,
+        };
+        return { ok: true, t };
       });
     }
     return this._pngPromise;

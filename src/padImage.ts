@@ -1,5 +1,5 @@
 import { assert } from "./util/assert";
-import { Jimp, JimpInstance } from "jimp";
+import { RawImage } from "./util/rawImage";
 
 export type VerticalAlign = "top" | "middle" | "bottom";
 
@@ -46,19 +46,19 @@ function getLeftPadding(
 export function padImage(
   desiredWidth: number,
   desiredHeight: number,
-  image: JimpInstance,
+  image: RawImage,
   verticalAlign: VerticalAlign,
   horizontalAlign: HorizontalAlign,
-) {
-  const actualWidth = image.bitmap.width;
-  const actualHeight = image.bitmap.height;
+): RawImage {
+  const actualWidth = image.width;
+  const actualHeight = image.height;
   assert(actualWidth <= desiredWidth && actualHeight <= desiredHeight);
 
-  const paddedImage = new Jimp({
-    data: Buffer.alloc(desiredHeight * desiredWidth * 4),
+  const paddedImage: RawImage = {
+    data: new Uint8Array(desiredHeight * desiredWidth * 4),
     width: desiredWidth,
     height: desiredHeight,
-  });
+  };
 
   const topPadding = getTopPadding(verticalAlign, actualHeight, desiredHeight);
   const leftPadding = getLeftPadding(
@@ -67,22 +67,19 @@ export function padImage(
     desiredWidth,
   );
 
-  paddedImage.bitmap.data.fill(0x00000000);
   const bytesPerPixel = 4;
+  const rowBytes = actualWidth * bytesPerPixel;
 
   for (let i = 0; i < actualHeight; i++) {
     const destinationRow = topPadding + i;
+    const paddedRowOffset =
+      bytesPerPixel * (desiredWidth * destinationRow + leftPadding);
+    const imageRowOffset = rowBytes * i;
 
-    const paddedRowOffset = bytesPerPixel * desiredWidth * destinationRow;
-    const imageRowOffset = bytesPerPixel * actualWidth * i;
-
-    for (let j = 0; j < actualWidth; j++) {
-      const destinationPixel = j + leftPadding;
-      const paddedOffset = paddedRowOffset + destinationPixel * bytesPerPixel;
-      const imageOffset = imageRowOffset + j * bytesPerPixel;
-      const pixel = image.bitmap.data.readInt32LE(imageOffset);
-      paddedImage.bitmap.data.writeInt32LE(pixel, paddedOffset);
-    }
+    paddedImage.data.set(
+      image.data.subarray(imageRowOffset, imageRowOffset + rowBytes),
+      paddedRowOffset,
+    );
   }
 
   return paddedImage;
