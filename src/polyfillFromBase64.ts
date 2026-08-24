@@ -1,5 +1,7 @@
 //@ts-nocheck
 
+/** Polyfill from  From https://github.com/ungap/base64/blob/main/index.js */
+
 const { defineProperty } = Object;
 const { prototype } = Uint8Array;
 
