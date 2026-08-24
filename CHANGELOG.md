@@ -4,6 +4,11 @@ All notable changes to the "image-diff" extension will be documented in this fil
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## 0.1.1
+
+Add a polyfill for `UInt8Array.fromBase64` taken from https://github.com/ungap/base64/blob/main/index.js
+Thank you @WebReflection
+
 ## 0.1.0
 
 Replaced jimp with jSquash for format support
