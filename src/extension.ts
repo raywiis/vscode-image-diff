@@ -1,5 +1,6 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
+import "./polyfillFromBase64";
 import * as vscode from "vscode";
 import { ImageDiffViewer } from "./ImageDiffViewer";
 import { wasmReady } from "./wasm";
