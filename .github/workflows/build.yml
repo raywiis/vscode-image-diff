@@ -27,5 +27,5 @@ jobs:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
     - run: corepack enable
-    - run: yarn
+    - run: yarn --immutable
     - run: yarn build
